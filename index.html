@@ -22,8 +22,8 @@
         }
     </style>
     <script>
-        function toggleDropdown() {
-            var dropdownContent = document.querySelector('.dropdown-content');
+        function toggleDropdown(dropdownClass) {
+            var dropdownContent = document.querySelector(dropdownClass);
             dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
         }
     </script>
@@ -37,14 +37,14 @@
         </div>
     </header>
     <div class="dropdown">
-        <button onclick="toggleDropdown()">Classic Games</button>
+        <button onclick="toggleDropdown('.dropdown-content')">Classic Games</button>
         <div class="dropdown-content">
             <div class="dropdown">
-                <button onclick="toggleDropdown()">TETRIS</button>
-                <div class="dropdown-content">
+                <button onclick="toggleDropdown('.tetris-content')">TETRIS</button>
+                <div class="dropdown-content tetris-content">
                     Inkin6779 was here.
-                </div> <!-- Closing tag added here -->
-            </div> <!-- Closing tag added here -->
+                </div>
+            </div>
         </div>
     </div>
     <footer>
