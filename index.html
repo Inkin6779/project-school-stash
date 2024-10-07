@@ -8,17 +8,28 @@
     <audio autoplay loop>
         <source src="audio.mp3" type="audio/mpeg">
     </audio>
+    <style>
+        .dropdown-content {
+            display: none; /* Initially hide the dropdown content */
+        }
+    </style>
+    <script>
+        function toggleDropdown() {
+            var dropdownContent = document.querySelector('.dropdown-content');
+            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+        }
+    </script>
 </head>
 <body>
     <header>
         <div style="text-align: center;">
             <h1>Project School Stash</h1>
             <h2>Provided by <a href="https://github.com/Inkin6779">Inkin6779</a></h2>
-            <p1>Your little game provider while in school, and actually updated. (At least as much as I will bother)</p1>
+            <p>Your little game provider while in school, and actually updated. (At least as much as I will bother)</p>
         </div>
     </header>
     <div class="dropdown">
-        <button>Menu</button>
+        <button onclick="toggleDropdown()">Menu</button>
         <div class="dropdown-content">
             <a href="#link1">Link 1</a>
             <a href="#link2">Link 2</a>
@@ -28,6 +39,7 @@
 </body>
 <footer>
     <div style="text-align: center;">
-    <p>PLEASE NOTE THAT THIS PAGE IS A WORK IN PROGRESS RIGHT NOW!</p>
+        <p>PLEASE NOTE THAT THIS PAGE IS A WORK IN PROGRESS RIGHT NOW!</p>
+    </div>
 </footer>
 </html>
