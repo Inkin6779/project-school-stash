@@ -8,26 +8,49 @@
     <audio autoplay loop>
         <source src="audio.mp3" type="audio/mpeg">
     </audio>
+    <style>
+        .dropdown-content {
+            display: none; /* Initially hide the dropdown content */
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block; /* Show dropdown on hover */
+        }
+    </style>
+    <script>
+        function toggleDropdown() {
+            var dropdownContent = document.querySelector('.dropdown-content');
+            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+        }
+    </script>
 </head>
 <body>
     <header>
         <div style="text-align: center;">
             <h1>Project School Stash</h1>
             <h2>Provided by <a href="https://github.com/Inkin6779">Inkin6779</a></h2>
-            <p1>Your little game provider while in school, and actually updated. (At least as much as I will bother)</p1>
+            <p>Your little game provider while in school, and actually updated. (At least as much as I will bother)</p>
         </div>
     </header>
     <div class="dropdown">
-        <button>Classic Games</button>
+        <button onclick="toggleDropdown()">Classic Games</button>
         <div class="dropdown-content">
-            <a href="#link1">Link 1</a>
-            <a href="#link2">Link 2</a>
-            <a href="#link3">Link 3</a>
+            <div class="dropdown">
+                <button onclick="toggleDropdown()">TETRIS</button>
+                <div class="dropdown-content">
+                    <a href="https://inkin6779.github.io/REAL-TETRIS/">NES</a>
+            <a href="#link2">Placeholder</a>
+            <a href="#link3">Placeholder</a>
         </div>
     </div>
+    <footer>
+        <div style="text-align: center;">
+            <p>PLEASE NOTE THAT THIS PAGE IS A WORK IN PROGRESS RIGHT NOW!</p>
+        </div>
+    </footer>
 </body>
-<footer>
-    <div style="text-align: center;">
-    <p>PLEASE NOTE THAT THIS PAGE IS A WORK IN PROGRESS RIGHT NOW!</p>
-</footer>
 </html>
