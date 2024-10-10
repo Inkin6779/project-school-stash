@@ -11,6 +11,11 @@
       </audio>
     <title>Project School Stash</title>
     <script>
+      window.onbeforeunload = function() {
+          return "Are you sure you want to reload?";
+      };
+  </script>
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
           var audio = document.getElementById('myAudio');
           audio.muted = true; // Mute the audio to bypass autoplay restriction
