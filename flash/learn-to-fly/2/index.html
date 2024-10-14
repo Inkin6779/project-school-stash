@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/png" href="download.png"/>
+    <title>Learn 2 Fly - Project School Stash</title>
+    <audio id="myAudio" autoplay loop>
+        <source src="audio.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+      </audio>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          var audio = document.getElementById('myAudio');
+          audio.muted = true; // Mute the audio to bypass autoplay restriction
+          audio.play().then(function() {
+            audio.muted = false; // Unmute after playing
+          }).catch(function(error) {
+            console.log('Playback failed:', error);
+          });
+        });
+      </script>
+    <style>
+        .dropdown-content {
+            display: none; /* Initially hide the dropdown content */
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+    </style>
+    <script>
+        function toggleDropdown(dropdownClass) {
+            var dropdownContent = document.querySelector(dropdownClass);
+            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <div style="text-align: center;">
+            <h1>Learn 2 Fly</h1>
+            <button onclick="window.location.href='/DuckLife2';">Play Now!</button>
+            <p>---------------</p>
+            <p>Not the one your looking for? Look below:</p>
+            <button onclick="window.location.href='/project-school-stash/flash/learn-to-fly/';">Learn to Fly</button>
+            <button onclick="window.location.href='/project-school-stash/flash/learn-to-fly/3';">Learn to Fly 3</button>
+            <button onclick="window.location.href='/project-school-stash/flash/learn-to-fly/idle';">Learn to Fly Idle</button>
+        </div>
+    </header>
+    <footer>
+        <div style="text-align: center;">
+            <p>_____________</p>
+            <button onclick="window.location.href='/project-school-stash/';">Return to Home</button>
+        </div>
+    </footer>
+</body>
+</html>
