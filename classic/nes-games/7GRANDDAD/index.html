@@ -20,22 +20,34 @@
           });
         });
       </script>
+    <style>
+        .dropdown-content {
+            display: none; /* Initially hide the dropdown content */
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+    </style>
+    <script>
+        function toggleDropdown(dropdownClass) {
+            var dropdownContent = document.querySelector(dropdownClass);
+            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+        }
+    </script>
 </head>
 <body>
     <header>
         <div style="text-align: center;">
-          <p><a href="https://www.youtube.com/watch?v=AVZe7Vx0eJ4">Song Playing: Friday Night Funkin' Lullaby's Shop Theme</a></p>
-          <h1>NES Games</h1>
-          <button onclick="window.location.href='TETRIS';">TETRIS</button>
-          <button onclick="window.location.href='SuperMarioBrosandDuckHunt';">Super Mario Bros + Duck Hunt</button>
-          <button onclick="window.location.href='7GRANDDAD';">7 GRAND DAD</button>
-            <p>Controls Listed Below. <br>_________<br>DPad: Arrow keys<br/>Start: Return, Select: Tab<br/>A Button: A, B Button: S</p>
+            <h1>7 GRAND DAD</h1>
+            <button onclick="window.location.href='/7GRANDDAD';">Play Now!</button>
         </div>
     </header>
     <footer>
         <div style="text-align: center;">
-          <p>_____________</p>
-          <button onclick="window.location.href='/project-school-stash/';">Return to Home</button>
+            <p>_____________</p>
+            <button onclick="window.location.href='/project-school-stash/';">Return to Home</button>
         </div>
     </footer>
 </body>
