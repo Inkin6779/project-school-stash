@@ -20,21 +20,34 @@
           });
         });
       </script>
+    <style>
+        .dropdown-content {
+            display: none; /* Initially hide the dropdown content */
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+    </style>
+    <script>
+        function toggleDropdown(dropdownClass) {
+            var dropdownContent = document.querySelector(dropdownClass);
+            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+        }
+    </script>
 </head>
 <body>
     <header>
         <div style="text-align: center;">
-          <p><a href="https://www.youtube.com/watch?v=AVZe7Vx0eJ4">Song Playing: Friday Night Funkin' Lullaby's Shop Theme</a></p>
-          <h1>NES Games</h1>
-          <button onclick="window.location.href='nes-games;">NES</button>
-          <button onclick="window.location.href='gba-games';">GBA</button>
-            <p>Controls Listed in their respective consoles</p>
+            <h1>7 GRAND DAD</h1>
+            <button onclick="window.location.href='/7GRANDDAD';">Play Now!</button>
         </div>
     </header>
     <footer>
         <div style="text-align: center;">
-          <p>_____________</p>
-          <button onclick="window.location.href='/project-school-stash/';">Return to Home</button>
+            <p>_____________</p>
+            <button onclick="window.location.href='/project-school-stash/';">Return to Home</button>
         </div>
     </footer>
 </body>
