@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/png" href="download.png"/>
+    <title>Slope - Project School Stash</title>
+    <audio id="myAudio" autoplay loop>
+        <source src="audio.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+      </audio>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          var audio = document.getElementById('myAudio');
+          audio.muted = true; // Mute the audio to bypass autoplay restriction
+          audio.play().then(function() {
+            audio.muted = false; // Unmute after playing
+          }).catch(function(error) {
+            console.log('Playback failed:', error);
+          });
+        });
+      </script>
+    <style>
+        .dropdown-content {
+            display: none; /* Initially hide the dropdown content */
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+    </style>
+    <script>
+        function toggleDropdown(dropdownClass) {
+            var dropdownContent = document.querySelector(dropdownClass);
+            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <div style="text-align: center;">
+            <p><a href="https://www.youtube.com/watch?v=AVZe7Vx0eJ4">Song Playing: Friday Night Funkin' Lullaby's Shop Theme</a></p>
+            <h1>Retro Bowl</h1>
+            <p>You're welcome jocks, cousin's friend recommended it, so here you go.</p>
+            <button onclick="window.location.href='/RetroBowl';">Play Now!</button><br>
+            <a href="https://hits.seeyoufarm.com"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Finkin6779.github.io%2FRetroBowl&count_bg=%23333333&title_bg=%233DA639&icon=openid.svg&icon_color=%23FFFFFF&title=Plays&edge_flat=false"/></a>
+        </div>
+    </header>
+    <footer>
+        <div style="text-align: center;">
+            <p>_____________</p>
+            <button onclick="window.location.href='/project-school-stash/';">Return to Home</button>
+        </div>
+    </footer>
+</body>
+</html>
