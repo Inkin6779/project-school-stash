@@ -6,6 +6,10 @@
     <meta name="google-site-verification" content="20J8Oifs9LxokXTLlqq89TJzl6fuISlU0uCkMpqVBUA" />
     <link rel="shortcut icon" type="image/jpeg" href="https://raw.githubusercontent.com/Inkin6779/project-school-stash/main/download.jpg"/>
     <audio id="myAudio" autoplay>
+      <style>
+        .answer { display: none; }
+        .question:hover + .answer { display: block; }
+    </style>
         <source src="https://raw.githubusercontent.com/Inkin6779/project-school-stash/main/audio404.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
       </audio>
@@ -32,16 +36,20 @@
             <ul>
               <li>Windows Computer</li>
                 <ul>
-                  <li>Chrome Remote Desktop</li>
+                  <li><a href="https://support.google.com/chrome/answer/1649523">Chrome Remote Desktop Remote Access</a></li>
                 </ul>
               <li>Other Computer (Like a Chromebook)</li>
                <ul>
-                <li><a href="">Chrome Remote Desktop Site</a></li>
+                <li><a href="https://remotedesktop.google.com/u/0/access">Chrome Remote Desktop Site</a></li>
               </ul>
               <li>Designated Account for it*</li>
           </ul>
         <p style="color: grey;">*Not required but will help.</p>
     </header>
+    <div>
+      <span class="question" onclick="this.nextElementSibling.style.display='block'">Section 1: Windows Side</span>
+      <span class="answer"></span>
+  </div>
     <footer>
         <div style="text-align: center;">
             <p>_____________</p>
