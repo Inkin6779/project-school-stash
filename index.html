@@ -6,9 +6,16 @@
     <meta name="google-site-verification" content="20J8Oifs9LxokXTLlqq89TJzl6fuISlU0uCkMpqVBUA" />
     <link rel="shortcut icon" type="image/jpeg" href="download.jpg"/>
     <audio id="myAudio" autoplay loop>
-        <source src="audio.mp3" type="audio/mpeg" volume="65%">
+        <source src="audio.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
       </audio>
+      <script>
+        // Access the audio element
+        var audio = document.getElementById('myAudio');
+        
+        // Set the volume (0.0 to 1.0)
+        audio.volume = 0.65; // This sets the volume to 65%
+    </script>
     <title>Project School Stash</title>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
