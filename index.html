@@ -22,7 +22,7 @@
           var audio = document.getElementById('myAudio');
           audio.muted = true;
           audio.play().then(function() {
-            audio.muted = false; // Unmute after playing
+            audio.muted = false;
           }).catch(function(error) {
             console.log('Playback failed:', error);
           });
