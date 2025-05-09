@@ -20,7 +20,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
           var audio = document.getElementById('myAudio');
-          audio.muted = true; // Mute the audio to bypass autoplay restriction
+          audio.muted = true;
           audio.play().then(function() {
             audio.muted = false; // Unmute after playing
           }).catch(function(error) {
