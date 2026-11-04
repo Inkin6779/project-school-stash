@@ -20,22 +20,35 @@ jobs:
       - name: Scan Directories and Generate JSON
         run: |
           echo "[" > directory.json
+          
+          # Use a process substitution loop to keep variables alive in the main shell
           first=true
-          # Use find to locate all directories and check for index.html files
-          find . -type d ! -name ".git" ! -name "node_modules" | while read dir; do
+          while read -r dir; do
             dir_name="${dir#./}"  # Remove leading './'
+            
+            # Skip the root workspace directory if it returns '.'
+            [ "$dir_name" = "." ] && continue
+            
+            # Only index folders that contain an index.html file (real game targets)
             if [ -f "$dir/index.html" ]; then
-              has_index="true"
-            else
-              has_index="false"
+              
+              # Isolate the final slug (e.g., extracts "learn-to-fly" from "flash/learn-to-fly")
+              folder_slug=$(basename "$dir_name")
+              
+              # Dynamic formatting: Replace dashes/underscores with spaces and capitalize each word
+              clean_name=$(echo "$folder_slug" | sed -E 's/[-_]+/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) lower(substr($i,2))}1')
+              
+              if [ "$first" = true ]; then
+                first=false
+              else
+                echo "," >> directory.json
+              fi
+              
+              # Store both the beautiful clean name and the exact file system path
+              echo "  {\"name\": \"$clean_name\", \"path\": \"$dir_name\", \"slug\": \"$folder_slug\"}" >> directory.json
             fi
-            if [ "$first" = true ]; then
-              first=false
-            else
-              echo "," >> directory.json
-            fi
-            echo "  {\"name\": \"$dir_name\", \"hasPage\": $has_index}" >> directory.json
-          done
+          done < <(find . -type d ! -path '*/.*' ! -name 'node_modules')
+          
           echo "]" >> directory.json
 
       - name: Commit and Push Changes
