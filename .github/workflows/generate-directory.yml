@@ -4,12 +4,18 @@ on:
     branches:
       - main  # Runs whenever you update your code
 
+# THIS BLOCK FIXES THE EXIT CODE 128 PERMISSION ERROR
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: main # Fixes detached HEAD states during pushes
 
       - name: Scan Directories and Generate JSON
         run: |
@@ -38,6 +44,6 @@ jobs:
       - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@://github.com"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add directory.json
-          git diff-index --quiet HEAD || git commit -m "chore: updated folder tracking matrix [skip ci]" && git push
+          git diff-index --quiet HEAD || (git commit -m "chore: updated folder tracking matrix [skip ci]" && git push origin main)
