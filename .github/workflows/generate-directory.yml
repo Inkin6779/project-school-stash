@@ -19,25 +19,22 @@ jobs:
 
       - name: Scan Directories and Generate JSON
         run: |
-          # Finds all top-level directories, excluding hidden Git configurations
           echo "[" > directory.json
           first=true
-          for dir in */; do
-            dir_name="${dir%/}"
-            if [ "$dir_name" != ".github" ] && [ "$dir_name" != "node_modules" ]; then
-              if [ "$first" = true ]; then
-                first=false
-              else
-                echo "," >> directory.json
-              fi
-              # Check if directory contains an index.html file
-              if [ -f "$dir_name/index.html" ]; then
-                has_index="true"
-              else
-                has_index="false"
-              fi
-              echo "  {\"name\": \"$dir_name\", \"hasPage\": $has_index}" >> directory.json
+          # Use find to locate all directories and check for index.html files
+          find . -type d ! -name ".git" ! -name "node_modules" | while read dir; do
+            dir_name="${dir#./}"  # Remove leading './'
+            if [ -f "$dir/index.html" ]; then
+              has_index="true"
+            else
+              has_index="false"
             fi
+            if [ "$first" = true ]; then
+              first=false
+            else
+              echo "," >> directory.json
+            fi
+            echo "  {\"name\": \"$dir_name\", \"hasPage\": $has_index}" >> directory.json
           done
           echo "]" >> directory.json
 
