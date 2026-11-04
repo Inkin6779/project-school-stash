@@ -1,0 +1,15 @@
+[
+  {"name": "classic", "hasPage": true}
+,
+  {"name": "emulators", "hasPage": true}
+,
+  {"name": "flash", "hasPage": true}
+,
+  {"name": "form", "hasPage": true}
+,
+  {"name": "general", "hasPage": true}
+,
+  {"name": "updates", "hasPage": true}
+,
+  {"name": "windows", "hasPage": true}
+]
