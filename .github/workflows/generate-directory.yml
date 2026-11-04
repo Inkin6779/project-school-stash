@@ -2,9 +2,8 @@ name: Auto-Generate Folder Directory
 on:
   push:
     branches:
-      - main  # Runs whenever you update your code
+      - main
 
-# THIS BLOCK FIXES THE EXIT CODE 128 PERMISSION ERROR
 permissions:
   contents: write
 
@@ -15,28 +14,29 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          ref: main # Fixes detached HEAD states during pushes
+          ref: main
 
       - name: Scan Directories and Generate JSON
         run: |
           echo "[" > directory.json
           
-          # Use a process substitution loop to keep variables alive in the main shell
           first=true
+          
+          # Target only subdirectories inside all-games/
           while read -r dir; do
-            dir_name="${dir#./}"  # Remove leading './'
+            dir_name="${dir#./}"
             
-            # Skip the root workspace directory if it returns '.'
+            # Skip structural/system workspace folders
             [ "$dir_name" = "." ] && continue
+            [ "$dir_name" = "all-games" ] && continue
             
-            # Only index folders that contain an index.html file (real game targets)
-            if [ -f "$dir/index.html" ]; then
+            folder_slug=$(basename "$dir_name")
+
+            # CRITICAL FILTER: Only process the folder if BOTH index.html AND a .title file exist
+            if [ -f "$dir/index.html" ] && [ -f "$dir/.title" ]; then
               
-              # Isolate the final slug (e.g., extracts "learn-to-fly" from "flash/learn-to-fly")
-              folder_slug=$(basename "$dir_name")
-              
-              # FIXED: Changed lower() to tolower() so awk processes the strings correctly
-              clean_name=$(echo "$folder_slug" | sed -E 's/[-_]+/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2))}1')
+              # Read the clean name directly from the .title file
+              clean_name=$(head -n 1 "$dir/.title" | xargs)
               
               if [ "$first" = true ]; then
                 first=false
@@ -44,10 +44,9 @@ jobs:
                 echo "," >> directory.json
               fi
               
-              # Store both the beautiful clean name and the exact file system path
               echo "  {\"name\": \"$clean_name\", \"path\": \"$dir_name\", \"slug\": \"$folder_slug\"}" >> directory.json
             fi
-          done < <(find . -type d ! -path '*/.*' ! -name 'node_modules')
+          done < <(find ./all-games -type d ! -path '*/.*' ! -name 'node_modules' 2>/dev/null || find . -type d ! -path '*/.*' ! -name 'node_modules')
           
           echo "]" >> directory.json
 
