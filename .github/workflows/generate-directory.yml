@@ -1,0 +1,43 @@
+name: Auto-Generate Folder Directory
+on:
+  push:
+    branches:
+      - main  # Runs whenever you update your code
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Scan Directories and Generate JSON
+        run: |
+          # Finds all top-level directories, excluding hidden Git configurations
+          echo "[" > directory.json
+          first=true
+          for dir in */; do
+            dir_name="${dir%/}"
+            if [ "$dir_name" != ".github" ] && [ "$dir_name" != "node_modules" ]; then
+              if [ "$first" = true ]; then
+                first=false
+              else
+                echo "," >> directory.json
+              fi
+              # Check if directory contains an index.html file
+              if [ -f "$dir_name/index.html" ]; then
+                has_index="true"
+              else
+                has_index="false"
+              fi
+              echo "  {\"name\": \"$dir_name\", \"hasPage\": $has_index}" >> directory.json
+            fi
+          done
+          echo "]" >> directory.json
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@://github.com"
+          git add directory.json
+          git diff-index --quiet HEAD || git commit -m "chore: updated folder tracking matrix [skip ci]" && git push
