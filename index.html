@@ -9,17 +9,57 @@
         <source src="audio.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
       </audio>
-      <script>
-        // Access the audio element
-        var audio = document.getElementById('myAudio');
-        
-        // Set the volume (0.0 to 1.0)
-        audio.volume = 0.65; // This sets the volume to 65%
-    </script>
     <title>Project School Stash</title>
+    
+    <style>
+        /* Simple styling for the dynamic repository search area */
+        .search-container {
+            margin: 20px auto;
+            max-width: 500px;
+        }
+        .search-input {
+            padding: 8px;
+            width: 60%;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .search-btn {
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .repo-results {
+            margin-top: 15px;
+            text-align: left;
+            display: inline-block;
+            max-width: 600px;
+            width: 100%;
+        }
+        .repo-item {
+            background: #f4f4f4;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 5px solid #007bff;
+        }
+        .repo-item a {
+            font-weight: bold;
+            text-decoration: none;
+            color: #007bff;
+        }
+        .repo-item p {
+            margin: 5px 0 0 0;
+            font-size: 13px;
+            color: #555;
+        }
+    </style>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+          // Audio Configuration
           var audio = document.getElementById('myAudio');
+          audio.volume = 0.65; // This sets the volume to 65%
           audio.muted = true;
           audio.play().then(function() {
             audio.muted = false;
@@ -27,12 +67,79 @@
             console.log('Playback failed:', error);
           });
         });
-      </script>
+
+        // Repository Search Logic
+        async function fetchOtherRepos() {
+            const username = 'Inkin6779';
+            const searchInput = document.getElementById('repoSearchInput').value.toLowerCase();
+            const resultsContainer = document.getElementById('repoResults');
+            
+            // Define your excluded list here (case-insensitive names)
+            const exclusions = [
+                'baseflash', 
+                'inkin6779.github.io', // usually holds main site, not a standalone game
+                'project-school-stash' // current repo context, if applicable
+            ];
+
+            resultsContainer.innerHTML = "<p style='color: gray;'>Searching stashes...</p>";
+
+            try {
+                // Fetch public repositories from GitHub API
+                const response = await fetch(`https://github.com{username}/repos?per_page=100&sort=updated`);
+                if (!response.ok) throw new Error('Failed to retrieve repos.');
+                
+                const repos = await response.json();
+                
+                // Filter elements out based on exclusions and search criteria
+                const filteredRepos = repos.filter(repo => {
+                    const nameLower = repo.name.toLowerCase();
+                    const descLower = (repo.description || '').toLowerCase();
+                    
+                    // 1. Check if the repo name is explicitly excluded
+                    if (exclusions.includes(nameLower)) return false;
+                    
+                    // 2. Match against user text query (if any text is typed)
+                    if (searchInput) {
+                        return nameLower.includes(searchInput) || descLower.includes(searchInput);
+                    }
+                    
+                    return true;
+                });
+
+                // Clear results container
+                resultsContainer.innerHTML = "";
+
+                if (filteredRepos.length === 0) {
+                    resultsContainer.innerHTML = "<p style='color: red;'>No games matching that query found.</p>";
+                    return;
+                }
+
+                // Append matching items onto screen
+                filteredRepos.forEach(repo => {
+                    const item = document.createElement('div');
+                    item.className = 'repo-item';
+                    
+                    // Route directly to their live page if it's a GitHub Page, fallback to source repo link
+                    const gameUrl = repo.has_pages ? `https://${username}.github.io/${repo.name}` : repo.html_url;
+
+                    item.innerHTML = `
+                        <a href="${gameUrl}" target="_blank">${repo.name}</a>
+                        <p>${repo.description || 'No description provided.'}</p>
+                    `;
+                    resultsContainer.appendChild(item);
+                });
+
+            } catch (error) {
+                console.error(error);
+                resultsContainer.innerHTML = "<p style='color: red;'>Error fetching extra repositories. Please try again later.</p>";
+            }
+        }
+    </script>
 </head>
 <body>
     <header>
         <div style="text-align: center;">
-          <p><a href="https://www.youtube.com/watch?v=AVZe7Vx0eJ4">Song Playing: Friday Night Funkin' Lullaby's Shop Theme</a></p>
+          <p><a href="https://youtube.com">Song Playing: Friday Night Funkin' Lullaby's Shop Theme</a></p>
             <h1>Project School Stash</h1>
             <h2>Provided by <a href="https://inkin6779.github.io">Inkin6779</a></h2>
             <p>Your little game provider while in school, and actually updated. (At least as much as I can do/am aware of, make me aware <a href="https://inkin6779.github.io/socials">here</a>, or use the form below if you need it.)</p>
@@ -47,13 +154,22 @@
         <button onclick="window.location.href='windows';">Windows</button><br>
         <button onclick="window.location.href='form';">Forms</button>
     </div>
+    
+    <!-- New Dynamic Repo Search Interface Section -->
+    <div class="search-container" style="text-align: center;">
+        <input type="text" id="repoSearchInput" class="search-input" placeholder="Search other games by Inkin6779...">
+        <button onclick="fetchOtherRepos();" class="search-btn">Search Stashes</button>
+        <br>
+        <div id="repoResults" class="repo-results"></div>
+    </div>
+
     <div style="text-align: center;">
-                        <button onclick="window.location.href='updates';">Update Log</button>
-          </div>
+        <button onclick="window.location.href='updates';">Update Log</button>
+    </div>
     <footer>
         <div style="text-align: center;">
-            <p>In case you ask: we were <a href="https://sites.google.com/view/project-school-stash/home">here,</a> but moved so it could appear on Google Searches, as seen <a href="https://www.google.com/search?q=project+school+stash&sca_esv=4614768026efb3bf&rlz=1C1GCEV_enUS1021US1021&ei=hisEZ_v0KobJptQP8eSz2AQ&ved=0ahUKEwj7z6CJ9vyIAxWGpIkEHXHyDEsQ4dUDCA8&uact=5&oq=project+school+stash&gs_lp=Egxnd3Mtd2l6LXNlcnAiFHByb2plY3Qgc2Nob29sIHN0YXNoMgUQIRigATIFECEYoAEyBRAhGKABMgUQIRigATIFECEYnwUyBRAhGJ8FMgUQIRifBTIFECEYnwUyBRAhGJ8FSKsRUI0GWLsOcAF4AZABAJgBcKABkASqAQM1LjG4AQPIAQD4AQGYAgegAqsEwgIKEAAYsAMY1gQYR8ICDRAAGIAEGLADGEMYigXCAgUQABiABMICCxAuGIAEGMcBGK8BwgILEAAYgAQYkQIYigXCAggQABgWGB4YD8ICBhAAGBYYHsICChAAGAgYChgNGB7CAgsQABiABBiGAxiKBcICCBAAGIAEGKIEwgIIEAAYogQYiQWYAwCIBgGQBgqSBwM2LjGgB98t&sclient=gws-wiz-serp&safe=active&ssui=on">here.</a></p>
-          </div>
+            <p>In case you ask: we were <a href="https://sites.google.com/view/project-school-stash/home">here,</a> but moved so it could appear on Google Searches, as seen <a href="https://www.google.com/search?q=project+school+stash">here.</a></p>
+        </div>
     </footer>
 </body>
 </html>
