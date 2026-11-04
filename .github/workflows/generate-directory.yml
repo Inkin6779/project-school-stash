@@ -35,8 +35,8 @@ jobs:
               # Isolate the final slug (e.g., extracts "learn-to-fly" from "flash/learn-to-fly")
               folder_slug=$(basename "$dir_name")
               
-              # Dynamic formatting: Replace dashes/underscores with spaces and capitalize each word
-              clean_name=$(echo "$folder_slug" | sed -E 's/[-_]+/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) lower(substr($i,2))}1')
+              # FIXED: Changed lower() to tolower() so awk processes the strings correctly
+              clean_name=$(echo "$folder_slug" | sed -E 's/[-_]+/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2))}1')
               
               if [ "$first" = true ]; then
                 first=false
@@ -54,6 +54,6 @@ jobs:
       - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.email "github-actions[bot]@://github.com"
           git add directory.json
           git diff-index --quiet HEAD || (git commit -m "chore: updated folder tracking matrix [skip ci]" && git push origin main)
