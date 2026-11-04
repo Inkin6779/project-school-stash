@@ -1,15 +1,237 @@
 [
-  {"name": "classic", "hasPage": true}
-,
-  {"name": "emulators", "hasPage": true}
+  {"name": ".", "hasPage": true}
 ,
   {"name": "flash", "hasPage": true}
 ,
-  {"name": "form", "hasPage": true}
+  {"name": "flash/learn-to-fly", "hasPage": true}
+,
+  {"name": "flash/learn-to-fly/2", "hasPage": true}
+,
+  {"name": "flash/learn-to-fly/3", "hasPage": true}
+,
+  {"name": "flash/learn-to-fly/idle", "hasPage": true}
+,
+  {"name": "flash/duck-life", "hasPage": true}
+,
+  {"name": "flash/duck-life/2", "hasPage": true}
+,
+  {"name": "flash/duck-life/4", "hasPage": true}
+,
+  {"name": "flash/duck-life/3", "hasPage": true}
+,
+  {"name": "flash/angry-birds", "hasPage": true}
+,
+  {"name": "flash/meat-boy", "hasPage": true}
+,
+  {"name": "flash/meat-boy/expansion", "hasPage": true}
+,
+  {"name": "flash/bad-piggies", "hasPage": true}
+,
+  {"name": "flash/happy-wheels", "hasPage": true}
+,
+  {"name": "flash/binding-of-isaac", "hasPage": true}
+,
+  {"name": "flash/alien-hominid", "hasPage": true}
+,
+  {"name": "flash/SFH2", "hasPage": true}
+,
+  {"name": "flash/bloons", "hasPage": true}
+,
+  {"name": "flash/bloons/2", "hasPage": true}
+,
+  {"name": "flash/bloons/tower-defense", "hasPage": true}
+,
+  {"name": "flash/bloons/tower-defense/5", "hasPage": true}
+,
+  {"name": "flash/bloons/tower-defense/2", "hasPage": true}
+,
+  {"name": "flash/bloons/tower-defense/4", "hasPage": true}
+,
+  {"name": "flash/bloons/tower-defense/4/Expansion", "hasPage": true}
+,
+  {"name": "flash/bloons/tower-defense/3", "hasPage": true}
+,
+  {"name": "flash/bloons/more-bloons", "hasPage": true}
+,
+  {"name": "flash/bloons/more-bloons/insanity", "hasPage": true}
+,
+  {"name": "flash/SFH", "hasPage": true}
+,
+  {"name": "flash/earn-to-die", "hasPage": true}
+,
+  {"name": "flash/super-mario-flash", "hasPage": true}
+,
+  {"name": "flash/super-smash-flash", "hasPage": true}
+,
+  {"name": "windows", "hasPage": true}
+,
+  {"name": "windows/setup", "hasPage": true}
+,
+  {"name": ".git/hooks", "hasPage": false}
+,
+  {"name": ".git/objects", "hasPage": false}
+,
+  {"name": ".git/objects/pack", "hasPage": false}
+,
+  {"name": ".git/objects/info", "hasPage": false}
+,
+  {"name": ".git/logs", "hasPage": false}
+,
+  {"name": ".git/logs/refs", "hasPage": false}
+,
+  {"name": ".git/logs/refs/remotes", "hasPage": false}
+,
+  {"name": ".git/logs/refs/remotes/origin", "hasPage": false}
+,
+  {"name": ".git/logs/refs/heads", "hasPage": false}
+,
+  {"name": ".git/info", "hasPage": false}
+,
+  {"name": ".git/refs", "hasPage": false}
+,
+  {"name": ".git/refs/remotes", "hasPage": false}
+,
+  {"name": ".git/refs/remotes/origin", "hasPage": false}
+,
+  {"name": ".git/refs/tags", "hasPage": false}
+,
+  {"name": ".git/refs/heads", "hasPage": false}
 ,
   {"name": "general", "hasPage": true}
 ,
+  {"name": "general/reactor", "hasPage": true}
+,
+  {"name": "general/undyne", "hasPage": true}
+,
+  {"name": "general/friday-night-funkin", "hasPage": true}
+,
+  {"name": "general/monster-tracks", "hasPage": true}
+,
+  {"name": "general/retro-bowl", "hasPage": true}
+,
+  {"name": "general/gunspin", "hasPage": true}
+,
+  {"name": "general/1v1.LOL", "hasPage": true}
+,
+  {"name": "general/minecraft", "hasPage": true}
+,
+  {"name": "general/slope", "hasPage": true}
+,
+  {"name": "general/snow-rider", "hasPage": true}
+,
+  {"name": "general/bad-time", "hasPage": true}
+,
+  {"name": "general/bad-time/extreme", "hasPage": true}
+,
+  {"name": "general/cookie-clicker", "hasPage": true}
+,
+  {"name": "classic", "hasPage": true}
+,
+  {"name": "classic/NEW-TETRIS", "hasPage": true}
+,
+  {"name": "classic/NES-TETRIS", "hasPage": true}
+,
+  {"name": ".github", "hasPage": false}
+,
+  {"name": ".github/workflows", "hasPage": false}
+,
   {"name": "updates", "hasPage": true}
 ,
-  {"name": "windows", "hasPage": true}
+  {"name": "emulators", "hasPage": true}
+,
+  {"name": "emulators/n64-games", "hasPage": true}
+,
+  {"name": "emulators/n64-games/SM64", "hasPage": true}
+,
+  {"name": "emulators/n64-games/SMK64", "hasPage": true}
+,
+  {"name": "emulators/copy-paste-base", "hasPage": true}
+,
+  {"name": "emulators/copy-paste-base/game", "hasPage": true}
+,
+  {"name": "emulators/nds-games", "hasPage": true}
+,
+  {"name": "emulators/nds-games/soup", "hasPage": true}
+,
+  {"name": "emulators/nds-games/starfy", "hasPage": true}
+,
+  {"name": "emulators/snes-games", "hasPage": true}
+,
+  {"name": "emulators/snes-games/world", "hasPage": true}
+,
+  {"name": "emulators/snes-games/kart", "hasPage": true}
+,
+  {"name": "emulators/a26-games", "hasPage": true}
+,
+  {"name": "emulators/a26-games/game", "hasPage": true}
+,
+  {"name": "emulators/gbc-games", "hasPage": true}
+,
+  {"name": "emulators/gbc-games/pokemon", "hasPage": true}
+,
+  {"name": "emulators/gbc-games/pokemon/silver", "hasPage": true}
+,
+  {"name": "emulators/gbc-games/pokemon/crystal", "hasPage": true}
+,
+  {"name": "emulators/gbc-games/pokemon/gold", "hasPage": true}
+,
+  {"name": "emulators/gba-games", "hasPage": true}
+,
+  {"name": "emulators/gba-games/pokemon", "hasPage": true}
+,
+  {"name": "emulators/gba-games/pokemon/sapphire", "hasPage": true}
+,
+  {"name": "emulators/gba-games/pokemon/ruby", "hasPage": true}
+,
+  {"name": "emulators/gba-games/pokemon/emerald", "hasPage": true}
+,
+  {"name": "emulators/gba-games/pokemon/firered", "hasPage": true}
+,
+  {"name": "emulators/gba-games/pokemon/rom", "hasPage": true}
+,
+  {"name": "emulators/gba-games/pokemon/rom/lightplatinum", "hasPage": true}
+,
+  {"name": "emulators/gba-games/pokemon/rom/898", "hasPage": true}
+,
+  {"name": "emulators/gba-games/pokemon/rom/radicalred", "hasPage": true}
+,
+  {"name": "emulators/gba-games/pokemon/pinball", "hasPage": true}
+,
+  {"name": "emulators/gba-games/pokemon/leafgreen", "hasPage": true}
+,
+  {"name": "emulators/gb-games", "hasPage": true}
+,
+  {"name": "emulators/gb-games/pokemon", "hasPage": true}
+,
+  {"name": "emulators/gb-games/pokemon/red", "hasPage": true}
+,
+  {"name": "emulators/gb-games/pokemon/yellow", "hasPage": true}
+,
+  {"name": "emulators/gb-games/pokemon/blue", "hasPage": true}
+,
+  {"name": "emulators/gb-games/tetris", "hasPage": true}
+,
+  {"name": "emulators/nes-games", "hasPage": true}
+,
+  {"name": "emulators/nes-games/SuperMarioBros3", "hasPage": true}
+,
+  {"name": "emulators/nes-games/SuperMarioBros2", "hasPage": true}
+,
+  {"name": "emulators/nes-games/SuperMarioBros2LL", "hasPage": true}
+,
+  {"name": "emulators/nes-games/Pac-Man", "hasPage": true}
+,
+  {"name": "emulators/nes-games/7GRANDDAD", "hasPage": true}
+,
+  {"name": "emulators/nes-games/SuperMarioBrosandDuckHunt", "hasPage": true}
+,
+  {"name": "emulators/nes-games/TETRIS", "hasPage": true}
+,
+  {"name": "form", "hasPage": true}
+,
+  {"name": "form/error", "hasPage": true}
+,
+  {"name": "form/new-game", "hasPage": true}
+,
+  {"name": "form/feedback", "hasPage": true}
 ]
