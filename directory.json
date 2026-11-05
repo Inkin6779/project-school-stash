@@ -1,5 +1,7 @@
 [
   {"name": "Tetris - Modern", "path": "all-games/NEW-TETRIS", "slug": "NEW-TETRIS"}
 ,
+  {"name": "Meat Boy", "path": "all-games/meat-boy", "slug": "meat-boy"}
+,
   {"name": "Tetris - Classic", "path": "all-games/CLASSIC-TETRIS", "slug": "CLASSIC-TETRIS"}
 ]
