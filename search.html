@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Game Search Results</title>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+</head>
+<body>
+
+    <h2>Search Results for: <span id="search-term"></span></h2>
+    <div id="results-container">Loading...</div>
+
+    <hr style="margin-top: 2rem;">
+    <p>
+        Game not found? Try a different search term, or 
+        <a href="YOUR_FORM_LINK_HERE" target="_blank">submit a form to get it added</a>.
+    </p>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const query = urlParams.get('q');
+        
+        document.getElementById('search-term').textContent = query || 'Nothing';
+        const resultsContainer = document.getElementById('results-container');
+
+        if (!query) {
+            resultsContainer.innerHTML = '<p>Please enter a search term.</p>';
+        } else {
+            fetch('directory.json')
+                .then(response => response.json())
+                .then(data => {
+                    const options = {
+                        includeScore: true,
+                        threshold: 0.4, 
+                        keys: ['name'] // Updated to match your JSON
+                    };
+                    
+                    const fuse = new Fuse(data, options);
+                    const results = fuse.search(query);
+
+                    if (results.length === 0) {
+                        resultsContainer.innerHTML = '<p>No matching games found.</p>';
+                        return;
+                    }
+
+                    resultsContainer.innerHTML = ''; 
+
+                    results.forEach(result => {
+                        const matchPercentage = Math.round((1 - result.score) * 100);
+                        const game = result.item;
+                        
+                        // Updated to use game.name and game.path
+                        resultsContainer.innerHTML += `
+                            <div style="margin-bottom: 10px;">
+                                <a href="${game.path}/index.html" style="font-size: 1.2em; text-decoration: none;">
+                                    ${game.name}
+                                </a>
+                                <span style="color: #555; font-size: 0.9em; margin-left: 10px;">
+                                    (${matchPercentage}% match)
+                                </span>
+                            </div>
+                        `;
+                    });
+                })
+                .catch(err => {
+                    console.error("Error loading directory:", err);
+                    resultsContainer.innerHTML = '<p>Error loading game directory.</p>';
+                });
+        }
+    </script>
+</body>
+</html>

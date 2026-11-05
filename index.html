@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="20J8Oifs9LxokXTLlqq89TJzl6fuISlU0uCkMpqVBUA" />
     <link rel="shortcut icon" type="image/jpeg" href="download.jpg"/>
-    <audio id="myAudio" autoplay loop>
-        <source src="audio.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-      </audio>
     <title>Project School Stash</title>
     
+    <!-- Load Fuse.js for typo-tolerant fuzzy searching -->
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+
     <style>
         /* Simple styling for the dynamic repository search area */
         .search-container {
@@ -47,6 +46,7 @@
             font-weight: bold;
             text-decoration: none;
             color: #007bff;
+            font-size: 1.1em;
         }
         .repo-item p {
             margin: 5px 0 0 0;
@@ -54,7 +54,7 @@
             color: #555;
         }
     </style>
-        <script>
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
           // Audio Configuration
           var audio = document.getElementById('myAudio');
@@ -65,77 +65,86 @@
           }).catch(function(error) {
             console.log('Playback failed:', error);
           });
+
+          // Allow users to press "Enter" in the search box
+          document.getElementById('repoSearchInput').addEventListener('keypress', function (e) {
+              if (e.key === 'Enter') {
+                  searchOtherRepos();
+              }
+          });
         });
 
-        // Pulls directories natively without triggering API blocks
-async function searchOtherRepos() {
-    const searchInput = document.getElementById('repoSearchInput').value.toLowerCase().trim();
-    const resultsContainer = document.getElementById('repoResults');
-    
-    if (!searchInput) {
-        resultsContainer.innerHTML = "<p style='color: gray;'>Type a title keyword above to find games...</p>";
-        return;
-    }
-
-    resultsContainer.innerHTML = "<p style='color: gray;'>Sorting matches...</p>";
-
-    try {
-        const response = await fetch('./directory.json');
-        if (!response.ok) throw new Error();
-        
-        const directories = await response.json();
-        
-        // Calculate dynamic proximity metrics for matches
-        const scoredGames = directories.map(game => {
-            let score = 0;
-            const nameLower = game.name.toLowerCase();
-            const slugLower = game.slug.toLowerCase();
-
-            if (nameLower === searchInput) {
-                score += 200; // Perfect full string match
-            } else if (nameLower.startsWith(searchInput)) {
-                score += 100; // Matches beginning of title phrase
-            } else if (nameLower.includes(searchInput)) {
-                score += 50;  // Matches partial inner word string
-            } else if (slugLower.includes(searchInput)) {
-                score += 20;  // Matches raw file storage code fallback
+        // Pulls directories and uses Fuse.js for typo tolerance
+        async function searchOtherRepos() {
+            const searchInput = document.getElementById('repoSearchInput').value.trim();
+            const resultsContainer = document.getElementById('repoResults');
+            
+            if (!searchInput) {
+                resultsContainer.innerHTML = "<p style='color: gray; text-align: center;'>Type a title keyword above to find games...</p>";
+                return;
             }
 
-            return { ...game, score };
-        }).filter(game => game.score > 0); // Keep matching entries
+            resultsContainer.innerHTML = "<p style='color: gray; text-align: center;'>Searching...</p>";
 
-        // Sort items: highest score floats to top
-        scoredGames.sort((a, b) => b.score - a.score);
+            try {
+                const response = await fetch('./directory.json');
+                if (!response.ok) throw new Error();
+                
+                const directories = await response.json();
+                
+                // Configure Fuse.js for typo tolerance
+                const options = {
+                    includeScore: true,
+                    threshold: 0.4, // 0.0 is perfect match, 1.0 is no match. 0.4 allows for typos like "Ducj"
+                    keys: ['name', 'slug']
+                };
+                
+                const fuse = new Fuse(directories, options);
+                const results = fuse.search(searchInput);
 
-        resultsContainer.innerHTML = "";
+                resultsContainer.innerHTML = "";
 
-        if (scoredGames.length === 0) {
-            resultsContainer.innerHTML = "<p style='color: red;'>No matches found. Try breaking down your phrase keyword.</p>";
-            return;
+                // If nothing is found, show the form prompt
+                if (results.length === 0) {
+                    resultsContainer.innerHTML = `
+                        <div style='text-align: center;'>
+                            <p style='color: red; font-weight: bold;'>No matches found.</p>
+                            <p>Game not found? Try a different search term, or <a href="form" style="color: #007bff; text-decoration: underline;">submit a form to get it added</a>.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Output matching game modules onto UI
+                results.forEach(result => {
+                    const matchPercentage = Math.round((1 - result.score) * 100);
+                    const game = result.item;
+                    const item = document.createElement('div');
+                    item.className = 'repo-item';
+                    
+                    // Appends accurate navigation target structure
+                    const targetUrl = `./${game.path}/index.html`;
+
+                    item.innerHTML = `
+                        <a href="${targetUrl}">${game.name}</a>
+                        <span style="color: #555; font-size: 0.85em; margin-left: 8px;">(${matchPercentage}% match)</span>
+                        <p style="font-size: 11px; color: #777; margin: 3px 0 0 0;">Directory Track: ${game.path}</p>
+                    `;
+                    resultsContainer.appendChild(item);
+                });
+
+            } catch (error) {
+                resultsContainer.innerHTML = "<p style='color: red; text-align: center;'>Failed to load current game directory tracking registry.</p>";
+            }
         }
-
-        // Output matching game modules onto UI
-        scoredGames.forEach(game => {
-            const item = document.createElement('div');
-            item.className = 'repo-item';
-            
-            // Appends accurate navigation target structure
-            const targetUrl = `./${game.path}/`;
-
-            item.innerHTML = `
-                <a href="${targetUrl}">${game.name}</a>
-                <p style="font-size: 11px; color: #777; margin: 3px 0 0 0;">Directory Track: ${game.path}</p>
-            `;
-            resultsContainer.appendChild(item);
-        });
-
-    } catch (error) {
-        resultsContainer.innerHTML = "<p style='color: red;'>Failed to load current game directory tracking registry.</p>";
-    }
-}
     </script>
 </head>
 <body>
+    <audio id="myAudio" autoplay loop>
+        <source src="audio.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
     <header>
         <div style="text-align: center;">
           <p><a href="https://youtube.com">Song Playing: Friday Night Funkin' Lullaby's Shop Theme</a></p>
@@ -157,7 +166,8 @@ async function searchOtherRepos() {
     <!-- New Dynamic Repo Search Interface Section -->
     <div class="search-container" style="text-align: center;">
         <input type="text" id="repoSearchInput" class="search-input" placeholder="Search other games by Inkin6779...">
-        <button onclick="fetchOtherRepos();" class="search-btn">Search Stashes</button>
+        <!-- FIXED: Button now calls searchOtherRepos() to match the script -->
+        <button onclick="searchOtherRepos();" class="search-btn">Search Stashes</button>
         <br>
         <div id="repoResults" class="repo-results"></div>
     </div>
