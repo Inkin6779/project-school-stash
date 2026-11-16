@@ -1,13 +1,13 @@
 [
+  {"name": "Bad Piggies", "path": "all-games/BadPiggies", "slug": "BadPiggies"}
+,
   {"name": "The Binding of Isaac - Wrath of The Lamb", "path": "all-games/BindingOfIsaac", "slug": "BindingOfIsaac"}
 ,
   {"name": "Meat Boy", "path": "all-games/meat-boy", "slug": "meat-boy"}
 ,
-  {"name": "Alien Hominid", "path": "all-games/alien-hominid", "slug": "alien-hominid"}
-,
   {"name": "Tetris - Modern", "path": "all-games/NEW-TETRIS", "slug": "NEW-TETRIS"}
 ,
-  {"name": "Bad Piggies", "path": "all-games/bad-piggies", "slug": "bad-piggies"}
+  {"name": "Alien Hominid", "path": "all-games/AlienHominid", "slug": "AlienHominid"}
 ,
   {"name": "Angry Birds", "path": "all-games/AngryBirds", "slug": "AngryBirds"}
 ,
