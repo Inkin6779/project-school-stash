@@ -9,9 +9,9 @@
 ,
   {"name": "Tetris - Modern", "path": "all-games/NEW-TETRIS", "slug": "NEW-TETRIS"}
 ,
+  {"name": "Meat Boy - Expansion", "path": "all-games/MeatBoyExpansion", "slug": "MeatBoyExpansion"}
+,
   {"name": "Alien Hominid", "path": "all-games/AlienHominid", "slug": "AlienHominid"}
 ,
   {"name": "Angry Birds", "path": "all-games/AngryBirds", "slug": "AngryBirds"}
-,
-  {"name": "Meat Boy - Expansion", "path": "all-games/meat-boy-expansion", "slug": "meat-boy-expansion"}
 ]
