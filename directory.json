@@ -5,5 +5,5 @@
 ,
   {"name": "Tetris - Classic", "path": "all-games/CLASSIC-TETRIS", "slug": "CLASSIC-TETRIS"}
 ,
-  {"name": "Meat Boy - Expansion", "path": "all-games/expansion", "slug": "expansion"}
+  {"name": "Meat Boy - Expansion", "path": "all-games/meat-boy-expansion", "slug": "meat-boy-expansion"}
 ]
