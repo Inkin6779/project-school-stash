@@ -1,5 +1,5 @@
 [
-  {"name": "The Binding of Isaac - Wrath of The Lamb", "path": "all-games/binding-of-isaac", "slug": "binding-of-isaac"}
+  {"name": "The Binding of Isaac - Wrath of The Lamb", "path": "all-games/BindingOfIsaac", "slug": "BindingOfIsaac"}
 ,
   {"name": "Meat Boy", "path": "all-games/meat-boy", "slug": "meat-boy"}
 ,
@@ -9,9 +9,9 @@
 ,
   {"name": "Bad Piggies", "path": "all-games/bad-piggies", "slug": "bad-piggies"}
 ,
+  {"name": "Angry Birds", "path": "all-games/AngryBirds", "slug": "AngryBirds"}
+,
   {"name": "Tetris - Classic", "path": "all-games/CLASSIC-TETRIS", "slug": "CLASSIC-TETRIS"}
 ,
   {"name": "Meat Boy - Expansion", "path": "all-games/meat-boy-expansion", "slug": "meat-boy-expansion"}
-,
-  {"name": "Angry Birds", "path": "all-games/angry-birds", "slug": "angry-birds"}
 ]
