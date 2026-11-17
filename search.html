@@ -23,7 +23,12 @@
         document.getElementById('search-term').textContent = query || 'Nothing';
         const resultsContainer = document.getElementById('results-container');
 
-        if (!query) {
+        const broadSearchTerms = ["Pokemon", "Tetris", "Bloons", "Learn to Fly"];
+        const isBroadSearch = broadSearchTerms.some(term => query && query.includes(term));
+
+        if (isBroadSearch) {
+            resultsContainer.innerHTML = '<p>This search is too broad, try being more specific or <a href="#">search anyway</a>.</p>';
+        } else if (!query) {
             resultsContainer.innerHTML = '<p>Please enter a search term.</p>';
         } else {
             fetch('directory.json')
@@ -32,7 +37,7 @@
                     const options = {
                         includeScore: true,
                         threshold: 0.4, 
-                        keys: ['name'] // Updated to match your JSON
+                        keys: ['name']
                     };
                     
                     const fuse = new Fuse(data, options);
@@ -49,7 +54,6 @@
                         const matchPercentage = Math.round((1 - result.score) * 100);
                         const game = result.item;
                         
-                        // Updated to use game.name and game.path
                         resultsContainer.innerHTML += `
                             <div style="margin-bottom: 10px;">
                                 <a href="${game.path}/index.html" style="font-size: 1.2em; text-decoration: none;">
