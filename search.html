@@ -13,18 +13,18 @@
     <hr style="margin-top: 2rem;">
     <p>
         Game not found? Try a different search term, or 
-        <a href="YOUR_FORM_LINK_HERE" target="_blank">submit a form to get it added</a>.
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfXxIjYVfGeXXO2MgF-rW1nIXFu0v2iag_2ZWf9GTm0b-7tUw" target="_blank">submit a form to get it added</a>.
     </p>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const query = urlParams.get('q');
         
-        document.getElementById('search-term').textContent = query || 'Nothing';
+        document.getElementById('search-term').textContent = query ? query : 'Please enter a search term.';
         const resultsContainer = document.getElementById('results-container');
 
         const broadSearchTerms = ["Pokemon", "Tetris", "Bloons", "Learn to Fly"];
-        const isBroadSearch = broadSearchTerms.some(term => query && query.includes(term));
+        const isBroadSearch = query && broadSearchTerms.some(term => query.includes(term));
 
         if (isBroadSearch) {
             resultsContainer.innerHTML = '<p>This search is too broad, try being more specific or <a href="#">search anyway</a>.</p>';
