@@ -75,11 +75,15 @@
                     resultsContainer.innerHTML = `<p style="color: #555;">Showing all ${sortedGames.length} games:</p>`;
 
                     sortedGames.forEach(game => {
-                        resultsContainer.innerHTML += `
-                            <div class="game-item">
-                                <a href="https://inkin6779.github.io/project-school-stash/${game.path}">${game.name}</a>
-                            </div>
-                        `;
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'game-item';
+
+                        const link = document.createElement('a');
+                        link.href = `https://inkin6779.github.io/project-school-stash/${game.path}`;
+                        link.textContent = game.name;
+
+                        itemDiv.appendChild(link);
+                        resultsContainer.appendChild(itemDiv);
                     });
                 })
                 .catch(err => {
@@ -117,16 +121,17 @@
                         return;
                     }
 
+                    // FIX: Redirect immediately if the top result is a near-perfect match (score <= 0.02)
+                    // and either there's only 1 result or the second result is distinctly less relevant.
+                    if (results[0].score <= 0.02 && (results.length === 1 || results[1].score - results[0].score > 0.15)) {
+                        window.location.href = `https://inkin6779.github.io/project-school-stash/${results[0].item.path}`;
+                        return;
+                    }
+
                     // Warn if too many results return (unless user clicked "search anyway")
                     if (!forceSearch && results.length > 10) {
                         const forceUrl = `?q=${encodeURIComponent(query)}&force=true`;
                         resultsContainer.innerHTML = `<p>Too many matches (${results.length} games found). Try being more specific or <a href="${forceUrl}">search anyway</a>.</p>`;
-                        return;
-                    }
-
-                    // Redirect immediately if a single exact match is found
-                    if (results.length === 1 && results[0].score <= 0.01) {
-                        window.location.href = `https://inkin6779.github.io/project-school-stash/${results[0].item.path}`;
                         return;
                     }
 
@@ -136,16 +141,22 @@
                         const matchPercentage = Math.round((1 - result.score) * 100);
                         const game = result.item;
                         
-                        resultsContainer.innerHTML += `
-                            <div class="game-item">
-                                <a href="https://inkin6779.github.io/project-school-stash/${game.path}">
-                                    ${game.name}
-                                </a>
-                                <span style="color: #555; font-size: 0.9em; margin-left: 10px;">
-                                    (${matchPercentage}% match)
-                                </span>
-                            </div>
-                        `;
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'game-item';
+
+                        const link = document.createElement('a');
+                        link.href = `https://inkin6779.github.io/project-school-stash/${game.path}`;
+                        link.textContent = game.name;
+
+                        const span = document.createElement('span');
+                        span.style.color = '#555';
+                        span.style.fontSize = '0.9em';
+                        span.style.marginLeft = '10px';
+                        span.textContent = `(${matchPercentage}% match)`;
+
+                        itemDiv.appendChild(link);
+                        itemDiv.appendChild(span);
+                        resultsContainer.appendChild(itemDiv);
                     });
                 })
                 .catch(err => {
