@@ -45,7 +45,7 @@
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSfXxIjYVfGeXXO2MgF-rW1nIXFu0v2iag_2ZWf9GTm0b-7tUw" target="_blank">submit a form to get it added</a>.
     </p>
 
-    <script>
+<script>
         const urlParams = new URLSearchParams(window.location.search);
         const query = urlParams.get('q');
         const showAll = urlParams.get('all') === 'true';
@@ -77,7 +77,7 @@
                     sortedGames.forEach(game => {
                         resultsContainer.innerHTML += `
                             <div class="game-item">
-                                <a href="https://inkin6779.github.io/project-school-stash/{game.path}">${game.name}</a>
+                                <a href="https://inkin6779.github.io/project-school-stash/${game.path}">${game.name}</a>
                             </div>
                         `;
                     });
@@ -126,7 +126,7 @@
 
                     // Redirect immediately if a single exact match is found
                     if (results.length === 1 && results[0].score <= 0.01) {
-                        window.location.href = `https://inkin6779.github.io/project-school-stash/{results.item.path}`;
+                        window.location.href = `https://inkin6779.github.io/project-school-stash/${results[0].item.path}`;
                         return;
                     }
 
@@ -138,7 +138,7 @@
                         
                         resultsContainer.innerHTML += `
                             <div class="game-item">
-                                <a href="https://github.io{game.path}">
+                                <a href="https://inkin6779.github.io/project-school-stash/${game.path}">
                                     ${game.name}
                                 </a>
                                 <span style="color: #555; font-size: 0.9em; margin-left: 10px;">
