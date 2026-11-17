@@ -109,7 +109,10 @@
                 .then(data => {
                     const options = {
                         includeScore: true,
-                        threshold: 0.4, 
+                        // Tighter threshold (lower means stricter matching). 
+                        // This penalizes extra words/expansions so they score much lower.
+                        threshold: 0.25, 
+                        distance: 100,
                         keys: ['name', 'slug']
                     };
                     
@@ -121,9 +124,9 @@
                         return;
                     }
 
-                    // FIX: Redirect immediately if the top result is a near-perfect match (score <= 0.02)
-                    // and either there's only 1 result or the second result is distinctly less relevant.
-                    if (results[0].score <= 0.02 && (results.length === 1 || results[1].score - results[0].score > 0.15)) {
+                    // Immediate redirect if the top result is a near-perfect match 
+                    // and significantly better than the next result.
+                    if (results[0].score <= 0.02 && (results.length === 1 || results[1].score - results[0].score > 0.20)) {
                         window.location.href = `https://inkin6779.github.io/project-school-stash/${results[0].item.path}`;
                         return;
                     }
@@ -138,6 +141,9 @@
                     resultsContainer.innerHTML = ''; 
 
                     results.forEach(result => {
+                        // In Fuse.js, score 0 is a perfect match, 1 is a complete mismatch.
+                        // Lowering threshold forces extra words to have higher scores, 
+                        // automatically driving down the calculated match percentage.
                         const matchPercentage = Math.round((1 - result.score) * 100);
                         const game = result.item;
                         
