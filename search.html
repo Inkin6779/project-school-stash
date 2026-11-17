@@ -3,13 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< Updated upstream
-    <title>Game Search Results - Project School Stash</title>
-    <script src="https://jsdelivr.net"></script>
-=======
     <title>Search Results - Project School Stash</title>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
->>>>>>> Stashed changes
     <style>
         body {
             font-family: sans-serif;
@@ -41,23 +36,13 @@
 
     <div class="nav-buttons">
         <button onclick="window.location.href='index.html';">← Back to Home</button>
-<<<<<<< Updated upstream
-        <button onclick="window.location.href='search.html?all=true';">All Games</button>
-=======
->>>>>>> Stashed changes
     </div>
-
     <h2 id="page-heading">Search Results for: <span id="search-term"></span></h2>
     <div id="results-container">Loading...</div>
-
     <hr style="margin-top: 2rem;">
     <p>
         Game not found? Try a different search term, or 
-<<<<<<< Updated upstream
-        <a href="https://google.com" target="_blank">submit a form to get it added</a>.
-=======
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSfXxIjYVfGeXXO2MgF-rW1nIXFu0v2iag_2ZWf9GTm0b-7tUw" target="_blank">submit a form to get it added</a>.
->>>>>>> Stashed changes
     </p>
 
     <script>
@@ -92,11 +77,7 @@
                     sortedGames.forEach(game => {
                         resultsContainer.innerHTML += `
                             <div class="game-item">
-<<<<<<< Updated upstream
-                                <a href="https://github.io{game.path}">${game.name}</a>
-=======
                                 <a href="https://inkin6779.github.io/project-school-stash/{game.path}">${game.name}</a>
->>>>>>> Stashed changes
                             </div>
                         `;
                     });
@@ -108,12 +89,7 @@
 
         } else if (!query) {
             document.getElementById('search-term').textContent = 'Nothing';
-<<<<<<< Updated upstream
-            resultsContainer.innerHTML = '<p>Please enter a search term, or click <strong>All Games</strong> above to browse everything.</p>';
-=======
             resultsContainer.innerHTML = '<p>Please enter a search term.</p>';
->>>>>>> Stashed changes
-
         } else if (isBroadTerm) {
             document.getElementById('search-term').textContent = query;
             const forceUrl = `?q=${encodeURIComponent(query)}&force=true`;
@@ -150,11 +126,7 @@
 
                     // Redirect immediately if a single exact match is found
                     if (results.length === 1 && results[0].score <= 0.01) {
-<<<<<<< Updated upstream
-                        window.location.href = `https://github.io{results[0].item.path}`;
-=======
                         window.location.href = `https://inkin6779.github.io/project-school-stash/{results.item.path}`;
->>>>>>> Stashed changes
                         return;
                     }
 
