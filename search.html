@@ -2,12 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Game Search Results</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Search Results - Project School Stash</title>
     <script src="https://jsdelivr.net"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+        }
+        .nav-buttons {
+            margin-bottom: 20px;
+        }
+        .nav-buttons button {
+            padding: 8px 14px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+        .game-item {
+            margin-bottom: 10px;
+        }
+        .game-item a {
+            font-size: 1.2em;
+            text-decoration: none;
+            color: #007bff;
+        }
+        .game-item a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
 
-    <h2>Search Results for: <span id="search-term"></span></h2>
+    <div class="nav-buttons">
+        <button onclick="window.location.href='index.html';">← Back to Home</button>
+        <button onclick="window.location.href='search.html?all=true';">All Games</button>
+    </div>
+
+    <h2 id="page-heading">Search Results for: <span id="search-term"></span></h2>
     <div id="results-container">Loading...</div>
 
     <hr style="margin-top: 2rem;">
@@ -19,28 +51,66 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const query = urlParams.get('q');
+        const showAll = urlParams.get('all') === 'true';
         const forceSearch = urlParams.get('force') === 'true';
         
-        document.getElementById('search-term').textContent = query || 'Nothing';
+        const pageHeading = document.getElementById('page-heading');
         const resultsContainer = document.getElementById('results-container');
 
         const broadSearchTerms = ["pokemon", "tetris", "bloons", "learn to fly"];
         const cleanQuery = query ? query.trim().toLowerCase() : '';
         const isBroadTerm = !forceSearch && broadSearchTerms.includes(cleanQuery);
 
-        if (!query) {
-            resultsContainer.innerHTML = '<p>Please enter a search term.</p>';
+        if (showAll) {
+            pageHeading.textContent = 'All Available Games';
+            fetch('directory.json')
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data || data.length === 0) {
+                        resultsContainer.innerHTML = '<p>No games found in directory.</p>';
+                        return;
+                    }
+
+                    const sortedGames = [...data].sort((a, b) => a.name.localeCompare(b.name));
+                    resultsContainer.innerHTML = `<p style="color: #555;">Showing all ${sortedGames.length} games:</p>`;
+
+                    sortedGames.forEach(game => {
+                        resultsContainer.innerHTML += `
+                            <div class="game-item">
+                                <a href="https://github.io{game.path}">${game.name}</a>
+                            </div>
+                        `;
+                    });
+                })
+                .catch(err => {
+                    console.error("Error loading directory:", err);
+                    resultsContainer.innerHTML = '<p>Error loading game directory.</p>';
+                });
+
+        } else if (!query) {
+            document.getElementById('search-term').textContent = 'Nothing';
+            resultsContainer.innerHTML = '<p>Please enter a search term, or click <strong>All Games</strong> above to browse everything.</p>';
+
         } else if (isBroadTerm) {
+            document.getElementById('search-term').textContent = query;
             const forceUrl = `?q=${encodeURIComponent(query)}&force=true`;
             resultsContainer.innerHTML = `<p>This search is too broad, try being more specific or <a href="${forceUrl}">search anyway</a>.</p>`;
+
         } else {
+            document.getElementById('search-term').textContent = query;
             fetch('directory.json')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
                 .then(data => {
                     const options = {
                         includeScore: true,
                         threshold: 0.4, 
-                        keys: ['name']
+                        keys: ['name', 'slug']
                     };
                     
                     const fuse = new Fuse(data, options);
@@ -60,7 +130,7 @@
 
                     // Redirect immediately if a single exact match is found
                     if (results.length === 1 && results[0].score <= 0.01) {
-                        window.location.href = `${results[0].item.path}/index.html`;
+                        window.location.href = `https://github.io{results[0].item.path}`;
                         return;
                     }
 
@@ -71,8 +141,8 @@
                         const game = result.item;
                         
                         resultsContainer.innerHTML += `
-                            <div style="margin-bottom: 10px;">
-                                <a href="${game.path}/index.html" style="font-size: 1.2em; text-decoration: none;">
+                            <div class="game-item">
+                                <a href="https://github.io{game.path}">
                                     ${game.name}
                                 </a>
                                 <span style="color: #555; font-size: 0.9em; margin-left: 10px;">
