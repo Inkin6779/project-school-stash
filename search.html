@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Game Search Results</title>
-    <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+    <script src="https://jsdelivr.net"></script>
 </head>
 <body>
 
@@ -13,7 +13,7 @@
     <hr style="margin-top: 2rem;">
     <p>
         Game not found? Try a different search term, or 
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfXxIjYVfGeXXO2MgF-rW1nIXFu0v2iag_2ZWf9GTm0b-7tUw" target="_blank">submit a form to get it added</a>.
+        <a href="https://google.com" target="_blank">submit a form to get it added</a>.
     </p>
 
     <script>
@@ -26,11 +26,11 @@
 
         const broadSearchTerms = ["pokemon", "tetris", "bloons", "learn to fly"];
         const cleanQuery = query ? query.trim().toLowerCase() : '';
-        const isBroadSearch = !forceSearch && broadSearchTerms.includes(cleanQuery);
+        const isBroadTerm = !forceSearch && broadSearchTerms.includes(cleanQuery);
 
         if (!query) {
             resultsContainer.innerHTML = '<p>Please enter a search term.</p>';
-        } else if (isBroadSearch) {
+        } else if (isBroadTerm) {
             const forceUrl = `?q=${encodeURIComponent(query)}&force=true`;
             resultsContainer.innerHTML = `<p>This search is too broad, try being more specific or <a href="${forceUrl}">search anyway</a>.</p>`;
         } else {
@@ -48,6 +48,13 @@
 
                     if (results.length === 0) {
                         resultsContainer.innerHTML = '<p>No matching games found.</p>';
+                        return;
+                    }
+
+                    // Warn if too many results return (unless user clicked "search anyway")
+                    if (!forceSearch && results.length > 10) {
+                        const forceUrl = `?q=${encodeURIComponent(query)}&force=true`;
+                        resultsContainer.innerHTML = `<p>Too many matches (${results.length} games found). Try being more specific or <a href="${forceUrl}">search anyway</a>.</p>`;
                         return;
                     }
 
