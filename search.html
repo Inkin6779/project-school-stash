@@ -18,22 +18,35 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const query = urlParams.get('q');
+        const rawQuery = urlParams.get('q');
+        const query = rawQuery ? rawQuery.trim() : '';
+        const forceSearch = urlParams.get('force') === 'true';
         
         document.getElementById('search-term').textContent = query ? query : 'Please enter a search term.';
         const resultsContainer = document.getElementById('results-container');
 
-        const broadSearchTerms = ["Pokemon", "Tetris", "Bloons", "Learn to Fly"];
-        const isBroadSearch = query && broadSearchTerms.some(term => query.includes(term));
+        // Store broad terms in lowercase for case-insensitive matching
+        const broadSearchTerms = ["pokemon", "tetris", "bloons", "learn to fly"];
+        
+        // Check if the query is too broad (unless the user clicked "search anyway")
+        const isBroadSearch = query && !forceSearch && broadSearchTerms.some(term => 
+            query.toLowerCase() === term || query.toLowerCase().includes(term)
+        );
 
-        if (isBroadSearch) {
-            resultsContainer.innerHTML = '<p>This search is too broad, try being more specific or <a href="#">search anyway</a>.</p>';
-        } else if (!query) {
-            resultsContainer.innerHTML = '<p>Please enter a search term.</p>';
-        } else {
+        function runSearch() {
             fetch('directory.json')
                 .then(response => response.json())
                 .then(data => {
+                    // 1. Check for an EXACT match first (case-insensitive)
+                    const exactMatch = data.find(game => game.name.toLowerCase() === query.toLowerCase());
+                    
+                    if (exactMatch) {
+                        // Immediately redirect to the exact match page
+                        window.location.href = `${exactMatch.path}/index.html`;
+                        return;
+                    }
+
+                    // 2. Otherwise, run fuzzy search with Fuse.js
                     const options = {
                         includeScore: true,
                         threshold: 0.4, 
@@ -54,9 +67,10 @@
                         const matchPercentage = Math.round((1 - result.score) * 100);
                         const game = result.item;
                         
+                        // 3. Added target="_blank" and rel="noopener noreferrer" to open in a new tab
                         resultsContainer.innerHTML += `
                             <div style="margin-bottom: 10px;">
-                                <a href="${game.path}/index.html" style="font-size: 1.2em; text-decoration: none;">
+                                <a href="${game.path}/index.html" target="_blank" rel="noopener noreferrer" style="font-size: 1.2em; text-decoration: none;">
                                     ${game.name}
                                 </a>
                                 <span style="color: #555; font-size: 0.9em; margin-left: 10px;">
@@ -70,6 +84,22 @@
                     console.error("Error loading directory:", err);
                     resultsContainer.innerHTML = '<p>Error loading game directory.</p>';
                 });
+        }
+
+        // Main execution flow
+        if (!query) {
+            resultsContainer.innerHTML = '<p>Please enter a search term.</p>';
+        } else if (isBroadSearch) {
+            // Build a link that reloads the page with &force=true to bypass the broad check
+            const forceUrl = new URL(window.location.href);
+            forceUrl.searchParams.set('force', 'true');
+            
+            resultsContainer.innerHTML = `
+                <p>This search is too broad, try being more specific or 
+                <a href="${forceUrl.toString()}">search anyway</a>.</p>
+            `;
+        } else {
+            runSearch();
         }
     </script>
 </body>
