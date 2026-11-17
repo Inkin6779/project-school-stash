@@ -19,17 +19,20 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const query = urlParams.get('q');
+        const forceSearch = urlParams.get('force') === 'true';
         
         document.getElementById('search-term').textContent = query || 'Nothing';
         const resultsContainer = document.getElementById('results-container');
 
-        const broadSearchTerms = ["Pokemon", "Tetris", "Bloons", "Learn to Fly"];
-        const isBroadSearch = broadSearchTerms.some(term => query && query.includes(term));
+        const broadSearchTerms = ["pokemon", "tetris", "bloons", "learn to fly"];
+        const cleanQuery = query ? query.trim().toLowerCase() : '';
+        const isBroadSearch = !forceSearch && broadSearchTerms.includes(cleanQuery);
 
-        if (isBroadSearch) {
-            resultsContainer.innerHTML = '<p>This search is too broad, try being more specific or <a href="#">search anyway</a>.</p>';
-        } else if (!query) {
+        if (!query) {
             resultsContainer.innerHTML = '<p>Please enter a search term.</p>';
+        } else if (isBroadSearch) {
+            const forceUrl = `?q=${encodeURIComponent(query)}&force=true`;
+            resultsContainer.innerHTML = `<p>This search is too broad, try being more specific or <a href="${forceUrl}">search anyway</a>.</p>`;
         } else {
             fetch('directory.json')
                 .then(response => response.json())
@@ -45,6 +48,12 @@
 
                     if (results.length === 0) {
                         resultsContainer.innerHTML = '<p>No matching games found.</p>';
+                        return;
+                    }
+
+                    // Redirect immediately if a single exact match is found
+                    if (results.length === 1 && results[0].score <= 0.01) {
+                        window.location.href = `${results[0].item.path}/index.html`;
                         return;
                     }
 
@@ -65,11 +74,6 @@
                             </div>
                         `;
                     });
-
-                    // Redirect to the game path if an exact match is found
-                    if (results.length === 1 && results[0].score === 0) {
-                        window.location.href = `https://inkin6779.github.io/project-school-stash/${results[0].item.path}/`;
-                    }
                 })
                 .catch(err => {
                     console.error("Error loading directory:", err);
