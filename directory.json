@@ -1,6 +1,8 @@
 [
   {"name": "Bad Piggies", "path": "all-games/BadPiggies", "slug": "BadPiggies"}
 ,
+  {"name": "Bloons Insanity", "path": "all-games/BloonsInsanity", "slug": "BloonsInsanity"}
+,
   {"name": "Meat Boy", "path": "all-games/MeatBoy", "slug": "MeatBoy"}
 ,
   {"name": "Bloons 2", "path": "all-games/Bloons2", "slug": "Bloons2"}
