@@ -6,9 +6,6 @@
     <meta name="google-site-verification" content="20J8Oifs9LxokXTLlqq89TJzl6fuISlU0uCkMpqVBUA" />
     <link rel="shortcut icon" type="image/jpeg" href="download.jpg"/>
     <title>Project School Stash</title>
-    
-    <!-- Load Fuse.js for typo-tolerant fuzzy searching -->
-    <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
 
     <style>
         /* Simple styling for the dynamic repository search area */
@@ -30,28 +27,9 @@
         }
         .repo-results {
             margin-top: 15px;
-            text-align: left;
-            display: inline-block;
+            text-align: center;
             max-width: 600px;
             width: 100%;
-        }
-        .repo-item {
-            background: #f4f4f4;
-            margin: 5px 0;
-            padding: 10px;
-            border-radius: 4px;
-            border-left: 5px solid #007bff;
-        }
-        .repo-item a {
-            font-weight: bold;
-            text-decoration: none;
-            color: #007bff;
-            font-size: 1.1em;
-        }
-        .repo-item p {
-            margin: 5px 0 0 0;
-            font-size: 13px;
-            color: #555;
         }
     </style>
     <script>
@@ -69,73 +47,22 @@
           // Allow users to press "Enter" in the search box
           document.getElementById('repoSearchInput').addEventListener('keypress', function (e) {
               if (e.key === 'Enter') {
-                  searchOtherRepos();
+                  goToSearch();
               }
           });
         });
 
-        // Pulls directories and uses Fuse.js for typo tolerance
-        async function searchOtherRepos() {
+        // Redirects to search.html with the user's query
+        function goToSearch() {
             const searchInput = document.getElementById('repoSearchInput').value.trim();
             const resultsContainer = document.getElementById('repoResults');
             
             if (!searchInput) {
-                resultsContainer.innerHTML = "<p style='color: gray; text-align: center;'>Type a title keyword above to find games...</p>";
+                resultsContainer.innerHTML = "<p style='color: gray;'>Type a title keyword above to find games...</p>";
                 return;
             }
 
-            resultsContainer.innerHTML = "<p style='color: gray; text-align: center;'>Searching...</p>";
-
-            try {
-                const response = await fetch('./directory.json');
-                if (!response.ok) throw new Error();
-                
-                const directories = await response.json();
-                
-                // Configure Fuse.js for typo tolerance
-                const options = {
-                    includeScore: true,
-                    threshold: 0.4, // 0.0 is perfect match, 1.0 is no match. 0.4 allows for typos like "Ducj"
-                    keys: ['name', 'slug']
-                };
-                
-                const fuse = new Fuse(directories, options);
-                const results = fuse.search(searchInput);
-
-                resultsContainer.innerHTML = "";
-
-                // If nothing is found, show the form prompt
-                if (results.length === 0) {
-                    resultsContainer.innerHTML = `
-                        <div style='text-align: center;'>
-                            <p style='color: red; font-weight: bold;'>No matches found.</p>
-                            <p>Game not found? Try a different search term, or <a href="form" style="color: #007bff; text-decoration: underline;">submit a form to get it added</a>.</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                // Output matching game modules onto UI
-                results.forEach(result => {
-                    const matchPercentage = Math.round((1 - result.score) * 100);
-                    const game = result.item;
-                    const item = document.createElement('div');
-                    item.className = 'repo-item';
-                    
-                    // Appends accurate navigation target structure
-                    const targetUrl = `./${game.path}/index.html`;
-
-                    item.innerHTML = `
-                        <a href="${targetUrl}">${game.name}</a>
-                        <span style="color: #555; font-size: 0.85em; margin-left: 8px;">(${matchPercentage}% match)</span>
-                        <p style="font-size: 11px; color: #777; margin: 3px 0 0 0;">Directory Track: ${game.path}</p>
-                    `;
-                    resultsContainer.appendChild(item);
-                });
-
-            } catch (error) {
-                resultsContainer.innerHTML = "<p style='color: red; text-align: center;'>Failed to load current game directory tracking registry.</p>";
-            }
+            window.location.href = `search.html?q=${encodeURIComponent(searchInput)}`;
         }
     </script>
 </head>
@@ -150,7 +77,7 @@
           <p><a href="https://youtube.com">Song Playing: Friday Night Funkin' Lullaby's Shop Theme</a></p>
             <h1>Project School Stash</h1>
             <h2>Provided by <a href="https://inkin6779.github.io">Inkin6779</a></h2>
-            <h3 style="color: red;">WARNING: If you can not find your game right now, this part of the site is under a re-modeling. If you know the URL directly, enter it that way, if not, use the search below.</a></h3>
+            <h3 style="color: red;">WARNING: If you can not find your game right now, this part of the site is under a re-modeling. If you know the URL directly, enter it that way, if not, use the search below.</h3>
             <p>Your little game provider while in school, and actually updated. (At least as much as I can do/am aware of, make me aware <a href="https://inkin6779.github.io/socials">here</a>, or use the form below if you need it.)</p>
             <p>Yes, I know. The "Leave Site?" prompt is annoying in the games, but it's actually further expanded than you think.</p>
         </div>
@@ -164,11 +91,10 @@
         <button onclick="window.location.href='form';">Forms</button>
     </div>
     
-    <!-- New Dynamic Repo Search Interface Section -->
+    <!-- Search Interface Section -->
     <div class="search-container" style="text-align: center;">
         <input type="text" id="repoSearchInput" class="search-input" placeholder="Search other games by Inkin6779...">
-        <!-- FIXED: Button now calls searchOtherRepos() to match the script -->
-        <button onclick="searchOtherRepos();" class="search-btn">Search Stashes</button>
+        <button onclick="goToSearch();" class="search-btn">Search Stashes</button>
         <br>
         <div id="repoResults" class="repo-results"></div>
     </div>
