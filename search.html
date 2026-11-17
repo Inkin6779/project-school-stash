@@ -109,7 +109,7 @@
                 .then(data => {
                     const options = {
                         includeScore: true,
-                        threshold: 0.5, 
+                        threshold: 0.2, // Stricter threshold
                         distance: 100,
                         keys: ['name', 'slug']
                     };
@@ -122,9 +122,21 @@
                         return;
                     }
 
+                    // Apply a length penalty to the score for items that have extra trailing words
+                    results.forEach(res => {
+                        const extraChars = res.item.name.length - cleanQuery.length;
+                        if (extraChars > 0) {
+                            // Add a penalty proportional to how many extra characters the title has
+                            res.score += extraChars * 0.03; 
+                        }
+                    });
+
+                    // Re-sort results after applying the penalty so exact matches float to the top
+                    results.sort((a, b) => a.score - b.score);
+
                     // Immediate redirect if the top result is a near-perfect match 
                     // and significantly better than the next result.
-                    if (results[0].score <= 0.01 && (results.length === 1 || results[1].score - results[0].score > 0.20)) {
+                    if (results[0].score <= 0.02 && (results.length === 1 || results[1].score - results[0].score > 0.15)) {
                         window.location.href = `https://inkin6779.github.io/project-school-stash/${results[0].item.path}`;
                         return;
                     }
@@ -139,10 +151,9 @@
                     resultsContainer.innerHTML = ''; 
 
                     results.forEach(result => {
-                        // In Fuse.js, score 0 is a perfect match, 1 is a complete mismatch.
-                        // Lowering threshold forces extra words to have higher scores, 
-                        // automatically driving down the calculated match percentage.
-                        const matchPercentage = Math.round((1 - result.score) * 100);
+                        // Calculate match percentage using the penalized score
+                        const effectiveScore = Math.min(result.score, 1);
+                        const matchPercentage = Math.round((1 - effectiveScore) * 100);
                         const game = result.item;
                         
                         const itemDiv = document.createElement('div');
