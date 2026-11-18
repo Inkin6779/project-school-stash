@@ -133,39 +133,6 @@
                     // Re-sort results after applying the penalty
                     results.sort((a, b) => a.score - b.score);
 
-                    // SIMPLIFIED COUNTDOWN TRIGGER: 
-                    // Triggers whenever the top result is an extremely close match (score <= 0.05).
-                    // This ensures it pauses and shows the countdown instead of instantly jumping.
-                    if (results[0].score <= 0.05) {
-                        const targetPath = `https://inkin6779.github.io/project-school-stash/${results[0].item.path}`;
-                        const gameName = results[0].item.name;
-
-                        let timeLeft = 3.5; // 3.5 seconds
-
-                        resultsContainer.innerHTML = `
-                            <p style="font-size: 1.1em; color: #333;">
-                                <strong>${gameName}</strong> found. Opening in <span id="countdown-timer">${timeLeft.toFixed(1)}</span>s...
-                            </p>
-                            <p style="font-size: 0.9em; color: #666;">
-                                <a href="${targetPath}">Click here if you aren't redirected automatically.</a>
-                            </p>
-                        `;
-
-                        const timerSpan = document.getElementById('countdown-timer');
-
-                        const interval = setInterval(() => {
-                            timeLeft -= 0.1;
-                            if (timeLeft <= 0) {
-                                clearInterval(interval);
-                                window.location.href = targetPath;
-                            } else {
-                                timerSpan.textContent = timeLeft.toFixed(1);
-                            }
-                        }, 100);
-
-                        return;
-                    }
-
                     // Warn if too many results return (unless user clicked "search anyway")
                     if (!forceSearch && results.length > 10) {
                         const forceUrl = `?q=${encodeURIComponent(query)}&force=true`;
@@ -175,6 +142,46 @@
 
                     resultsContainer.innerHTML = ''; 
 
+                    // Check if top result is a near-perfect match to show the non-blocking countdown banner
+                    const isPerfectMatch = results[0].score <= 0.05;
+                    let countdownInterval = null;
+
+                    if (isPerfectMatch) {
+                        const targetPath = `https://inkin6779.github.io/project-school-stash/${results[0].item.path}`;
+                        const gameName = results[0].item.name;
+                        let timeLeft = 3.5;
+
+                        const bannerDiv = document.createElement('div');
+                        bannerDiv.style.cssText = "background: #f8f9fa; border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 4px;";
+                        bannerDiv.innerHTML = `
+                            <p style="font-size: 1.1em; color: #333; margin: 0 0 8px 0;">
+                                <strong>${gameName}</strong> found. Opening in <span id="countdown-timer">${timeLeft.toFixed(1)}</span>s... 
+                                <button id="cancel-redirect" style="margin-left: 10px; font-size: 0.85em; cursor: pointer; padding: 3px 8px;">Stay Here</button>
+                            </p>
+                        `;
+                        resultsContainer.appendChild(bannerDiv);
+
+                        const timerSpan = document.getElementById('countdown-timer');
+                        const cancelBtn = document.getElementById('cancel-redirect');
+
+                        countdownInterval = setInterval(() => {
+                            timeLeft -= 0.1;
+                            if (timeLeft <= 0) {
+                                clearInterval(countdownInterval);
+                                window.location.href = targetPath;
+                            } else {
+                                timerSpan.textContent = timeLeft.toFixed(1);
+                            }
+                        }, 100);
+
+                        // Allow users to cancel the auto-redirect if they stay on the page
+                        cancelBtn.addEventListener('click', () => {
+                            clearInterval(countdownInterval);
+                            bannerDiv.remove();
+                        });
+                    }
+
+                    // Render the full list of search results underneath so they can see everything
                     results.forEach(result => {
                         const effectiveScore = Math.min(result.score, 1);
                         const matchPercentage = Math.round((1 - effectiveScore) * 100);
@@ -186,6 +193,11 @@
                         const link = document.createElement('a');
                         link.href = `https://inkin6779.github.io/project-school-stash/${game.path}`;
                         link.textContent = game.name;
+                        
+                        // If they click a result manually, make sure to stop the auto-redirect timer
+                        link.addEventListener('click', () => {
+                            if (countdownInterval) clearInterval(countdownInterval);
+                        });
 
                         const span = document.createElement('span');
                         span.style.color = '#555';
