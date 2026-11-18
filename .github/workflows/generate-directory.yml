@@ -55,4 +55,4 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@://github.com"
           git add directory.json
-          git diff-index --quiet HEAD || (git commit -m "chore: updated folder tracking matrix [skip ci]" && git push origin main)
+          git diff-index --quiet HEAD || (git commit -m "chore: updated folder tracking matrix" && git push origin main)
