@@ -134,13 +134,38 @@
                     // Re-sort results after applying the penalty so exact matches float to the top
                     results.sort((a, b) => a.score - b.score);
 
-                    // Immediate redirect if the top result is a near-perfect match 
-                    // and significantly better than the next result.
-                    if (results[0].score <= 0.02 && (results.length === 1 || results[1].score - results[0].score > 0.15)) {
-                        window.location.href = `https://inkin6779.github.io/project-school-stash/${results[0].item.path}`;
+// Immediate redirect with a 3.5-second countdown if a near-perfect match is found
+                    if (results[0].score <= 0.02 && (results.length === 1 || results[1].score - results[0].score > 0.20)) {
+                        const targetPath = `https://inkin6779.github.io/project-school-stash/${results[0].item.path}`;
+                        const gameName = results[0].item.name;
+
+                        let timeLeft = 3.5; // 3.5 seconds
+
+                        // Initial render of the countdown message
+                        resultsContainer.innerHTML = `
+                            <p style="font-size: 1.1em; color: #333;">
+                                <strong>${gameName}</strong> found. Opening in <span id="countdown-timer">${timeLeft.toFixed(1)}</span>s...
+                            </p>
+                            <p style="font-size: 0.9em; color: #666;">
+                                <a href="${targetPath}">Click here if you aren't redirected automatically.</a>
+                            </p>
+                        `;
+
+                        const timerSpan = document.getElementById('countdown-timer');
+
+                        // Update every 100ms for a smooth countdown display
+                        const interval = setInterval(() => {
+                            timeLeft -= 0.1;
+                            if (timeLeft <= 0) {
+                                clearInterval(interval);
+                                window.location.href = targetPath;
+                            } else {
+                                timerSpan.textContent = timeLeft.toFixed(1);
+                            }
+                        }, 100);
+
                         return;
                     }
-
                     // Warn if too many results return (unless user clicked "search anyway")
                     if (!forceSearch && results.length > 10) {
                         const forceUrl = `?q=${encodeURIComponent(query)}&force=true`;
