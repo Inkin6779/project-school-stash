@@ -3,13 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< Updated upstream
-    <title>Game Search Results - Project School Stash</title>
-    <script src="https://jsdelivr.net"></script>
-=======
     <title>Search Results - Project School Stash</title>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
->>>>>>> Stashed changes
     <style>
         body {
             font-family: sans-serif;
@@ -41,26 +36,16 @@
 
     <div class="nav-buttons">
         <button onclick="window.location.href='index.html';">← Back to Home</button>
-<<<<<<< Updated upstream
-        <button onclick="window.location.href='search.html?all=true';">All Games</button>
-=======
->>>>>>> Stashed changes
     </div>
-
     <h2 id="page-heading">Search Results for: <span id="search-term"></span></h2>
     <div id="results-container">Loading...</div>
-
     <hr style="margin-top: 2rem;">
     <p>
         Game not found? Try a different search term, or 
-<<<<<<< Updated upstream
-        <a href="https://google.com" target="_blank">submit a form to get it added</a>.
-=======
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSfXxIjYVfGeXXO2MgF-rW1nIXFu0v2iag_2ZWf9GTm0b-7tUw" target="_blank">submit a form to get it added</a>.
->>>>>>> Stashed changes
     </p>
 
-    <script>
+<script>
         const urlParams = new URLSearchParams(window.location.search);
         const query = urlParams.get('q');
         const showAll = urlParams.get('all') === 'true';
@@ -90,15 +75,15 @@
                     resultsContainer.innerHTML = `<p style="color: #555;">Showing all ${sortedGames.length} games:</p>`;
 
                     sortedGames.forEach(game => {
-                        resultsContainer.innerHTML += `
-                            <div class="game-item">
-<<<<<<< Updated upstream
-                                <a href="https://github.io{game.path}">${game.name}</a>
-=======
-                                <a href="https://inkin6779.github.io/project-school-stash/{game.path}">${game.name}</a>
->>>>>>> Stashed changes
-                            </div>
-                        `;
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'game-item';
+
+                        const link = document.createElement('a');
+                        link.href = `https://inkin6779.github.io/project-school-stash/${game.path}`;
+                        link.textContent = game.name;
+
+                        itemDiv.appendChild(link);
+                        resultsContainer.appendChild(itemDiv);
                     });
                 })
                 .catch(err => {
@@ -108,12 +93,7 @@
 
         } else if (!query) {
             document.getElementById('search-term').textContent = 'Nothing';
-<<<<<<< Updated upstream
-            resultsContainer.innerHTML = '<p>Please enter a search term, or click <strong>All Games</strong> above to browse everything.</p>';
-=======
             resultsContainer.innerHTML = '<p>Please enter a search term.</p>';
->>>>>>> Stashed changes
-
         } else if (isBroadTerm) {
             document.getElementById('search-term').textContent = query;
             const forceUrl = `?q=${encodeURIComponent(query)}&force=true`;
@@ -129,7 +109,8 @@
                 .then(data => {
                     const options = {
                         includeScore: true,
-                        threshold: 0.4, 
+                        threshold: 0.2, 
+                        distance: 100,
                         keys: ['name', 'slug']
                     };
                     
@@ -141,6 +122,17 @@
                         return;
                     }
 
+                    // Apply a length penalty to the score for items that have extra trailing words
+                    results.forEach(res => {
+                        const extraChars = res.item.name.length - cleanQuery.length;
+                        if (extraChars > 0) {
+                            res.score += extraChars * 0.03; 
+                        }
+                    });
+
+                    // Re-sort results after applying the penalty
+                    results.sort((a, b) => a.score - b.score);
+
                     // Warn if too many results return (unless user clicked "search anyway")
                     if (!forceSearch && results.length > 10) {
                         const forceUrl = `?q=${encodeURIComponent(query)}&force=true`;
@@ -148,32 +140,74 @@
                         return;
                     }
 
-                    // Redirect immediately if a single exact match is found
-                    if (results.length === 1 && results[0].score <= 0.01) {
-<<<<<<< Updated upstream
-                        window.location.href = `https://github.io{results[0].item.path}`;
-=======
-                        window.location.href = `https://inkin6779.github.io/project-school-stash/{results.item.path}`;
->>>>>>> Stashed changes
-                        return;
-                    }
-
                     resultsContainer.innerHTML = ''; 
 
+                    // Check if top result is a near-perfect match to show the non-blocking countdown banner
+                    const isPerfectMatch = results[0].score <= 0.05;
+                    let countdownInterval = null;
+
+                    if (isPerfectMatch) {
+                        const targetPath = `https://inkin6779.github.io/project-school-stash/${results[0].item.path}`;
+                        const gameName = results[0].item.name;
+                        let timeLeft = 3.5;
+
+                        const bannerDiv = document.createElement('div');
+                        bannerDiv.style.cssText = "background: #f8f9fa; border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 4px;";
+                        bannerDiv.innerHTML = `
+                            <p style="font-size: 1.1em; color: #333; margin: 0 0 8px 0;">
+                                <strong>${gameName}</strong> found. Opening in <span id="countdown-timer">${timeLeft.toFixed(1)}</span>s... 
+                                <button id="cancel-redirect" style="margin-left: 10px; font-size: 0.85em; cursor: pointer; padding: 3px 8px;">Stay Here</button>
+                            </p>
+                        `;
+                        resultsContainer.appendChild(bannerDiv);
+
+                        const timerSpan = document.getElementById('countdown-timer');
+                        const cancelBtn = document.getElementById('cancel-redirect');
+
+                        countdownInterval = setInterval(() => {
+                            timeLeft -= 0.1;
+                            if (timeLeft <= 0) {
+                                clearInterval(countdownInterval);
+                                window.location.href = targetPath;
+                            } else {
+                                timerSpan.textContent = timeLeft.toFixed(1);
+                            }
+                        }, 100);
+
+                        // Allow users to cancel the auto-redirect if they stay on the page
+                        cancelBtn.addEventListener('click', () => {
+                            clearInterval(countdownInterval);
+                            bannerDiv.remove();
+                        });
+                    }
+
+                    // Render the full list of search results underneath so they can see everything
                     results.forEach(result => {
-                        const matchPercentage = Math.round((1 - result.score) * 100);
+                        const effectiveScore = Math.min(result.score, 1);
+                        const matchPercentage = Math.round((1 - effectiveScore) * 100);
                         const game = result.item;
                         
-                        resultsContainer.innerHTML += `
-                            <div class="game-item">
-                                <a href="https://github.io{game.path}">
-                                    ${game.name}
-                                </a>
-                                <span style="color: #555; font-size: 0.9em; margin-left: 10px;">
-                                    (${matchPercentage}% match)
-                                </span>
-                            </div>
-                        `;
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'game-item';
+
+                        const link = document.createElement('a');
+                        link.href = `https://inkin6779.github.io/project-school-stash/${game.path}`;
+                        link.textContent = game.name;
+                        
+                        // If they click a result manually, make sure to stop the auto-redirect timer
+                        link.addEventListener('click', () => {
+                            if (countdownInterval) clearInterval(countdownInterval);
+                        });
+
+                        const span = document.createElement('span');
+                        span.style.color = '#555';
+                        span.style.fontSize = '0.9em';
+                        span.style.marginLeft = '10px';
+                        span.textContent = `(${matchPercentage}% match)`;
+
+                        itemDiv.appendChild(link);
+                        itemDiv.appendChild(span);
+                        resultsContainer.appendChild(itemDiv);
                     });
                 })
                 .catch(err => {
