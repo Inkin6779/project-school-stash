@@ -109,7 +109,7 @@
                 .then(data => {
                     const options = {
                         includeScore: true,
-                        threshold: 0.2, // Stricter threshold
+                        threshold: 0.2, 
                         distance: 100,
                         keys: ['name', 'slug']
                     };
@@ -126,22 +126,22 @@
                     results.forEach(res => {
                         const extraChars = res.item.name.length - cleanQuery.length;
                         if (extraChars > 0) {
-                            // Add a penalty proportional to how many extra characters the title has
                             res.score += extraChars * 0.03; 
                         }
                     });
 
-                    // Re-sort results after applying the penalty so exact matches float to the top
+                    // Re-sort results after applying the penalty
                     results.sort((a, b) => a.score - b.score);
 
-// Immediate redirect with a 3.5-second countdown if a near-perfect match is found
-                    if (results[0].score <= 0.02 && (results.length === 1 || results[1].score - results[0].score > 0.20)) {
+                    // SIMPLIFIED COUNTDOWN TRIGGER: 
+                    // Triggers whenever the top result is an extremely close match (score <= 0.05).
+                    // This ensures it pauses and shows the countdown instead of instantly jumping.
+                    if (results[0].score <= 0.05) {
                         const targetPath = `https://inkin6779.github.io/project-school-stash/${results[0].item.path}`;
                         const gameName = results[0].item.name;
 
                         let timeLeft = 3.5; // 3.5 seconds
 
-                        // Initial render of the countdown message
                         resultsContainer.innerHTML = `
                             <p style="font-size: 1.1em; color: #333;">
                                 <strong>${gameName}</strong> found. Opening in <span id="countdown-timer">${timeLeft.toFixed(1)}</span>s...
@@ -153,7 +153,6 @@
 
                         const timerSpan = document.getElementById('countdown-timer');
 
-                        // Update every 100ms for a smooth countdown display
                         const interval = setInterval(() => {
                             timeLeft -= 0.1;
                             if (timeLeft <= 0) {
@@ -166,6 +165,7 @@
 
                         return;
                     }
+
                     // Warn if too many results return (unless user clicked "search anyway")
                     if (!forceSearch && results.length > 10) {
                         const forceUrl = `?q=${encodeURIComponent(query)}&force=true`;
@@ -176,7 +176,6 @@
                     resultsContainer.innerHTML = ''; 
 
                     results.forEach(result => {
-                        // Calculate match percentage using the penalized score
                         const effectiveScore = Math.min(result.score, 1);
                         const matchPercentage = Math.round((1 - effectiveScore) * 100);
                         const game = result.item;
