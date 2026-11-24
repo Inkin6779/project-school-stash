@@ -1,0 +1,42 @@
+name: Bug report
+description: Something doesn't work as intended. help me here
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Show me what I need, and I'll try my best.
+  - type: input
+    id: game
+    attributes:
+      label: Game
+      description: What game is this on?
+      placeholder: "Super Mario World"
+    validations:
+      required: true
+
+  - type: input
+    id: issue
+    attributes:
+      label: Issue
+      description: The issue actually present that I need to fix
+      placeholder: "Graphics not rendering properly"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to make it happen
+      description: Where in the game you are and what you do, so it can be tried here (your save makes this exact).
+      placeholder: |
+        1. Open the game as normal
+        2. Wait for settings to render
+        3. ...
+
+  - type: textarea
+    id: info
+    attributes:
+      label: Extra information
+      description: |
+        If you have extra stuff within the stuff I should know about (like settings, device model, etc.), please add them here.
