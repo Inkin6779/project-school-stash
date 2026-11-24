@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - product
-  workflow_dispatch: # Allows you to trigger this manually from the Actions tab
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -17,7 +17,7 @@ jobs:
         with:
           ref: product
 
-      - name: Scan GitHub Repos and Generate JSON
+      - name: Scan GitHub Repos and Subfolders
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
           GITHUB_USER: "Inkin6779"
@@ -28,6 +28,7 @@ jobs:
           import json
           import urllib.request
           import urllib.error
+          import urllib.parse
 
           token = os.environ.get("GH_TOKEN")
           user = os.environ["GITHUB_USER"]
@@ -46,16 +47,19 @@ jobs:
                   with urllib.request.urlopen(req) as resp:
                       return resp.read().decode("utf-8")
               except urllib.error.HTTPError as e:
-                  if e.code == 404:
+                  if e.code in (404, 409): # 409 happens on empty repos
                       return None
                   raise
 
-          # 1. Fetch all repositories for the user (handles pagination)
+          # 1. Fetch all repositories for the user
           repos = []
           page = 1
           while True:
-              # Uses /user/repos if token is provided (includes private repos), otherwise /users/{user}/repos
-              endpoint = f"https://api.github.com/user/repos?per_page=100&page={page}" if token else f"https://api.github.com/users/{user}/repos?per_page=100&page={page}"
+              endpoint = (
+                  f"https://api.github.com/user/repos?per_page=100&page={page}"
+                  if token else
+                  f"https://api.github.com/users/{user}/repos?per_page=100&page={page}"
+              )
               data = fetch_url(endpoint)
               if not data:
                   break
@@ -72,50 +76,74 @@ jobs:
               owner = repo["owner"]["login"]
               default_branch = repo["default_branch"]
 
-              # Filter by owner and "pss" prefix
               if owner.lower() != user.lower() or not repo_name.startswith(prefix):
                   continue
 
-              # 2. Check for .info file in the root of the repository
-              info_url = f"https://raw.githubusercontent.com/{owner}/{repo_name}/{default_branch}/.info"
-              info_content = fetch_url(info_url)
-
-              if not info_content:
+              # 2. Recursively list every file in the repository
+              tree_url = f"https://api.github.com/repos/{owner}/{repo_name}/git/trees/{default_branch}?recursive=1"
+              tree_raw = fetch_url(tree_url)
+              if not tree_raw:
                   continue
 
-              # Optional: Keep the index.html requirement from your original script
-              index_url = f"https://raw.githubusercontent.com/{owner}/{repo_name}/{default_branch}/index.html"
-              if fetch_url(index_url) is None:
-                  continue
-
-              # 3. Dynamically parse all key = "value" pairs from .info
-              entry = {
-                  "slug": repo_name,
-                  "repo_url": repo["html_url"]
+              tree_data = json.loads(tree_raw)
+              all_files = {
+                  item["path"]
+                  for item in tree_data.get("tree", [])
+                  if item.get("type") == "blob"
               }
 
-              for line in info_content.splitlines():
-                  line = line.strip()
-                  if not line or line.startswith("#") or "=" not in line:
+              # 3. Find every .info file (root or any subfolder)
+              info_files = [
+                  p for p in all_files
+                  if p == ".info" or p.endswith("/.info")
+              ]
+
+              for info_path in info_files:
+                  folder_path = os.path.dirname(info_path)
+                  parts = folder_path.split("/") if folder_path else []
+
+                  # Skip hidden folders (.github, etc.) and node_modules
+                  if any(part.startswith(".") or part == "node_modules" for part in parts):
                       continue
-                  key, val = line.split("=", 1)
-                  key = key.strip()
-                  val = val.strip().strip('"').strip("'")
-                  entry[key] = val
 
-              # Fallback if 'name' is needed alongside 'title'
-              if "title" in entry and "name" not in entry:
-                  entry["name"] = entry["title"]
+                  # Verify index.html exists in the exact same folder
+                  expected_index = f"{folder_path}/index.html" if folder_path else "index.html"
+                  if expected_index not in all_files:
+                      continue
 
-              directory.append(entry)
+                  # Fetch and parse the .info file (URL-encode path in case folders have spaces)
+                  encoded_info_path = urllib.parse.quote(info_path)
+                  raw_url = f"https://raw.githubusercontent.com/{owner}/{repo_name}/{default_branch}/{encoded_info_path}"
+                  info_content = fetch_url(raw_url)
+                  if not info_content:
+                      continue
 
-          # Sort alphabetically by title/slug
+                  slug = parts[-1] if parts else repo_name
+                  entry = {
+                      "repo": repo_name,
+                      "path": folder_path,
+                      "slug": slug,
+                      "repo_url": repo["html_url"]
+                  }
+
+                  for line in info_content.splitlines():
+                      line = line.strip()
+                      if not line or line.startswith("#") or "=" not in line:
+                          continue
+                      key, val = line.split("=", 1)
+                      entry[key.strip()] = val.strip().strip('"').strip("'")
+
+                  if "title" in entry and "name" not in entry:
+                      entry["name"] = entry["title"]
+
+                  directory.append(entry)
+
           directory.sort(key=lambda x: x.get("title", x["slug"]).lower())
 
           with open("directory.json", "w", encoding="utf-8") as f:
               json.dump(directory, f, indent=2)
 
-          print(f"Successfully indexed {len(directory)} repositories.")
+          print(f"Successfully indexed {len(directory)} entries across matching repos.")
           EOF
 
       - name: Commit and Push Changes
