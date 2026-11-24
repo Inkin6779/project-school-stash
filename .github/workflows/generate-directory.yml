@@ -95,17 +95,17 @@ jobs:
               # 3. Find every .info file (root or any subfolder)
               info_files = [
                   p for p in all_files
-                  if p == ".info" or p.endswith("/.info")
+                  if p.endswith(".info")  # Corrected to check for .info files correctly
               ]
-
+              
               for info_path in info_files:
                   folder_path = os.path.dirname(info_path)
                   parts = folder_path.split("/") if folder_path else []
-
+              
                   # Skip hidden folders (.github, etc.) and node_modules
                   if any(part.startswith(".") or part == "node_modules" for part in parts):
                       continue
-
+              
                   # Verify game.html exists in the exact same folder
                   expected_game = f"{folder_path}/game.html" if folder_path else "game.html"
                   if expected_game not in all_files:
