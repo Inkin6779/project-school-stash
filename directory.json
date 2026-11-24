@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "repo": "pss-snes",
+    "path": "SuperMarioWorld",
+    "slug": "SuperMarioWorld",
+    "repo_url": "https://github.com/Inkin6779/pss-snes",
+    "title": "Super Mario World",
+    "console": "SNES",
+    "name": "Super Mario World"
+  }
+]
