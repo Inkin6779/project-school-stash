@@ -3,223 +3,572 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/jpeg" href="favicon.jpg">
     <title>Search Results - Project School Stash</title>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
     <style>
+        :root {
+            --bg-color: #1b263b;
+            --text-color: #ffffff;
+            --accent-color: #ffd166;
+            --btn-color: #ff595e;
+            --ui-glass: rgba(0, 0, 0, 0.24);
+            --ui-glass-hover: rgba(0, 0, 0, 0.42);
+            --ui-border: rgba(255, 255, 255, 0.16);
+            --font-main: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: sans-serif;
-            margin: 20px;
+            min-height: 100dvh;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            padding: 24px clamp(16px, 4vw, 48px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .nav-buttons {
-            margin-bottom: 20px;
+
+        .pss-container {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
-        .nav-buttons button {
-            padding: 8px 14px;
-            font-size: 14px;
+
+        /* Top Bar: Back Button + Inline Search + Console Filter */
+        .top-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .nav-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .glass-btn {
+            background: var(--ui-glass);
+            color: var(--text-color);
+            border: 1px solid var(--ui-border);
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
             cursor: pointer;
-            margin-right: 8px;
+            backdrop-filter: blur(6px);
+            transition: transform 0.15s ease, background 0.2s ease;
         }
-        .game-item {
-            margin-bottom: 10px;
+
+        .glass-btn:hover {
+            background: var(--ui-glass-hover);
+            transform: translateY(-2px);
         }
-        .game-item a {
-            font-size: 1.2em;
+
+        .inline-search {
+            display: flex;
+            flex: 1;
+            min-width: 280px;
+            max-width: 540px;
+            background: var(--ui-glass);
+            border: 1px solid var(--ui-border);
+            border-radius: 10px;
+            padding: 4px;
+            gap: 4px;
+            backdrop-filter: blur(6px);
+        }
+
+        .inline-search input {
+            flex: 1;
+            min-width: 0;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-color);
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 6px 12px;
+        }
+
+        .inline-search input::placeholder {
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        .console-select {
+            background: rgba(0, 0, 0, 0.35);
+            color: var(--text-color);
+            border: 1px solid var(--ui-border);
+            border-radius: 7px;
+            padding: 6px 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .console-select option {
+            background-color: #1b263b;
+            color: #ffffff;
+        }
+
+        .inline-search button {
+            background: var(--btn-color);
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 7px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: filter 0.15s ease;
+        }
+
+        .inline-search button:hover {
+            filter: brightness(1.1);
+        }
+
+        /* Heading */
+        #page-heading {
+            font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            margin-top: 4px;
+        }
+
+        #search-term {
+            color: var(--accent-color);
+        }
+
+        /* Results Area */
+        #results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .status-msg {
+            background: var(--ui-glass);
+            border: 1px solid var(--ui-border);
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            line-height: 1.5;
+        }
+
+        .status-msg a {
+            color: var(--accent-color);
+            font-weight: 700;
             text-decoration: none;
-            color: #007bff;
         }
-        .game-item a:hover {
+
+        .status-msg a:hover {
+            text-decoration: underline;
+        }
+
+        .count-label {
+            font-size: 0.95rem;
+            opacity: 0.75;
+            margin-bottom: 4px;
+        }
+
+        /* Auto-Redirect Countdown Banner */
+        .redirect-banner {
+            background: rgba(255, 89, 94, 0.18);
+            border: 1px solid var(--btn-color);
+            padding: 16px 20px;
+            border-radius: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+
+        .redirect-banner p {
+            font-size: 1.05rem;
+        }
+
+        .redirect-banner strong {
+            color: var(--accent-color);
+        }
+
+        .cancel-btn {
+            background: var(--ui-glass);
+            color: var(--text-color);
+            border: 1px solid var(--ui-border);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .cancel-btn:hover {
+            background: var(--ui-glass-hover);
+        }
+
+        /* Game Result Cards */
+        .game-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: var(--ui-glass);
+            border: 1px solid var(--ui-border);
+            padding: 14px 18px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .game-item:hover {
+            background: var(--ui-glass-hover);
+            border-color: rgba(255, 255, 255, 0.35);
+            transform: translateX(4px);
+        }
+
+        .game-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .game-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .console-badge {
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--accent-color);
+            font-size: 0.78rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.04em;
+        }
+
+        .match-badge {
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+
+        /* Footer */
+        .pss-footer {
+            margin-top: 16px;
+            padding-top: 18px;
+            border-top: 1px solid var(--ui-border);
+            font-size: 0.95rem;
+            opacity: 0.85;
+            text-align: center;
+        }
+
+        .pss-footer a {
+            color: var(--accent-color);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .pss-footer a:hover {
             text-decoration: underline;
         }
     </style>
 </head>
 <body>
+    <div class="pss-container">
+        <div class="top-bar">
+            <div class="nav-group">
+                <button class="glass-btn" onclick="window.location.href='index.html';">← Home</button>
+                <button class="glass-btn" onclick="window.location.href='search.html?all=true';">All Games</button>
+            </div>
 
-    <div class="nav-buttons">
-        <button onclick="window.location.href='index.html';">← Back to Home</button>
+            <form id="inlineSearchForm" class="inline-search">
+                <input type="text" id="inlineSearchInput" placeholder="Search games..." autocomplete="off" aria-label="Search games">
+                <select id="consoleFilter" class="console-select" aria-label="Filter by console">
+                    <option value="">All Consoles</option>
+                </select>
+                <button type="submit">Search</button>
+            </form>
+        </div>
+
+        <h2 id="page-heading">Search Results for: <span id="search-term"></span></h2>
+
+        <div id="results-container">
+            <p class="status-msg">Loading directory...</p>
+        </div>
+
+        <footer class="pss-footer">
+            Game not found? Try a different search term, or 
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSfXxIjYVfGeXXO2MgF-rW1nIXFu0v2iag_2ZWf9GTm0b-7tUw" target="_blank" rel="noopener">submit a form to get it added</a>.
+        </footer>
     </div>
-    <h2 id="page-heading">Search Results for: <span id="search-term"></span></h2>
-    <div id="results-container">Loading...</div>
-    <hr style="margin-top: 2rem;">
-    <p>
-        Game not found? Try a different search term, or 
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfXxIjYVfGeXXO2MgF-rW1nIXFu0v2iag_2ZWf9GTm0b-7tUw" target="_blank">submit a form to get it added</a>.
-    </p>
 
-<script>
+    <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const query = urlParams.get('q');
+        const query = urlParams.get('q') || '';
+        const selectedConsoleParam = urlParams.get('console') || '';
         const showAll = urlParams.get('all') === 'true';
         const forceSearch = urlParams.get('force') === 'true';
-        
+
         const pageHeading = document.getElementById('page-heading');
         const resultsContainer = document.getElementById('results-container');
+        const inlineSearchForm = document.getElementById('inlineSearchForm');
+        const inlineSearchInput = document.getElementById('inlineSearchInput');
+        const consoleFilter = document.getElementById('consoleFilter');
 
-        const broadSearchTerms = ["pokemon", "tetris", "bloons", "learn to fly"];
-        const cleanQuery = query ? query.trim().toLowerCase() : '';
-        const isBroadTerm = !forceSearch && broadSearchTerms.includes(cleanQuery);
+        inlineSearchInput.value = query;
 
-        // Helper to build the repo/path URL consistently
+        let directoryData = [];
+        let countdownInterval = null;
+
+        function clearRedirectTimer() {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+        }
+
+        function buildSearchUrl(qVal, consoleVal, isAll = false, isForce = false) {
+            const nextParams = new URLSearchParams();
+            if (isAll && !qVal) {
+                nextParams.set('all', 'true');
+            } else if (qVal) {
+                nextParams.set('q', qVal);
+            } else if (consoleVal) {
+                nextParams.set('all', 'true');
+            } else {
+                nextParams.set('all', 'true');
+            }
+
+            if (consoleVal) nextParams.set('console', consoleVal);
+            if (isForce) nextParams.set('force', 'true');
+            return `search.html?${nextParams.toString()}`;
+        }
+
+        inlineSearchForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            clearRedirectTimer();
+            const q = inlineSearchInput.value.trim();
+            const c = consoleFilter.value;
+            window.location.href = buildSearchUrl(q, c, !q);
+        });
+
+        // Re-filter live when the user changes the console dropdown
+        consoleFilter.addEventListener('change', function () {
+            clearRedirectTimer();
+            const nextUrl = buildSearchUrl(inlineSearchInput.value.trim(), this.value, showAll && !inlineSearchInput.value.trim(), forceSearch);
+            window.history.replaceState({}, '', nextUrl);
+            renderResults();
+        });
+
         function getGameUrl(game) {
             return `../${game.repo}/${game.path}`;
         }
 
-        if (showAll) {
-            pageHeading.textContent = 'All Available Games';
-            fetch('directory.json')
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .then(data => {
-                    if (!data || data.length === 0) {
-                        resultsContainer.innerHTML = '<p>No games found in directory.</p>';
-                        return;
-                    }
+        function createGameCard(game, matchPercentage = null) {
+            const link = document.createElement('a');
+            link.className = 'game-item';
+            link.href = getGameUrl(game);
+            link.addEventListener('click', clearRedirectTimer);
 
-                    const sortedGames = [...data].sort((a, b) => a.name.localeCompare(b.name));
-                    resultsContainer.innerHTML = `<p style="color: #555;">Showing all ${sortedGames.length} games:</p>`;
+            const titleSpan = document.createElement('span');
+            titleSpan.className = 'game-title';
+            titleSpan.textContent = game.name;
 
-                    sortedGames.forEach(game => {
-                        const itemDiv = document.createElement('div');
-                        itemDiv.className = 'game-item';
+            const metaDiv = document.createElement('div');
+            metaDiv.className = 'game-meta';
 
-                        const link = document.createElement('a');
-                        link.href = getGameUrl(game);
-                        link.textContent = game.name;
+            if (game.console) {
+                const consoleSpan = document.createElement('span');
+                consoleSpan.className = 'console-badge';
+                consoleSpan.textContent = game.console;
+                metaDiv.appendChild(consoleSpan);
+            }
 
-                        itemDiv.appendChild(link);
-                        resultsContainer.appendChild(itemDiv);
-                    });
-                })
-                .catch(err => {
-                    console.error("Error loading directory:", err);
-                    resultsContainer.innerHTML = '<p>Error loading game directory.</p>';
-                });
+            if (matchPercentage !== null) {
+                const matchSpan = document.createElement('span');
+                matchSpan.className = 'match-badge';
+                matchSpan.textContent = `${matchPercentage}% match`;
+                metaDiv.appendChild(matchSpan);
+            }
 
-        } else if (!query) {
-            document.getElementById('search-term').textContent = 'Nothing';
-            resultsContainer.innerHTML = '<p>Please enter a search term.</p>';
-        } else if (isBroadTerm) {
-            document.getElementById('search-term').textContent = query;
-            const forceUrl = `?q=${encodeURIComponent(query)}&force=true`;
-            resultsContainer.innerHTML = `<p>This search is too broad, try being more specific or <a href="${forceUrl}">search anyway</a>.</p>`;
-
-        } else {
-            document.getElementById('search-term').textContent = query;
-            fetch('directory.json')
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .then(data => {
-                    const options = {
-                        includeScore: true,
-                        threshold: 0.2, 
-                        distance: 100,
-                        keys: ['name', 'slug']
-                    };
-                    
-                    const fuse = new Fuse(data, options);
-                    const results = fuse.search(query);
-
-                    if (results.length === 0) {
-                        resultsContainer.innerHTML = '<p>No matching games found.</p>';
-                        return;
-                    }
-
-                    // Apply a length penalty to the score for items that have extra trailing words
-                    results.forEach(res => {
-                        const extraChars = res.item.name.length - cleanQuery.length;
-                        if (extraChars > 0) {
-                            res.score += extraChars * 0.03; 
-                        }
-                    });
-
-                    // Re-sort results after applying the penalty
-                    results.sort((a, b) => a.score - b.score);
-
-                    // Warn if too many results return (unless user clicked "search anyway")
-                    if (!forceSearch && results.length > 10) {
-                        const forceUrl = `?q=${encodeURIComponent(query)}&force=true`;
-                        resultsContainer.innerHTML = `<p>Too many matches (${results.length} games found). Try being more specific or <a href="${forceUrl}">search anyway</a>.</p>`;
-                        return;
-                    }
-
-                    resultsContainer.innerHTML = ''; 
-
-                    // Check if top result is a near-perfect match to show the non-blocking countdown banner
-                    const isPerfectMatch = results[0].score <= 0.05;
-                    let countdownInterval = null;
-
-                    if (isPerfectMatch) {
-                        const targetPath = getGameUrl(results[0].item);
-                        const gameName = results[0].item.name;
-                        let timeLeft = 3.5;
-
-                        const bannerDiv = document.createElement('div');
-                        bannerDiv.style.cssText = "background: #f8f9fa; border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 4px;";
-                        bannerDiv.innerHTML = `
-                            <p style="font-size: 1.1em; color: #333; margin: 0 0 8px 0;">
-                                <strong>${gameName}</strong> found. Opening in <span id="countdown-timer">${timeLeft.toFixed(1)}</span>s... 
-                                <button id="cancel-redirect" style="margin-left: 10px; font-size: 0.85em; cursor: pointer; padding: 3px 8px;">Stay Here</button>
-                            </p>
-                        `;
-                        resultsContainer.appendChild(bannerDiv);
-
-                        const timerSpan = document.getElementById('countdown-timer');
-                        const cancelBtn = document.getElementById('cancel-redirect');
-
-                        countdownInterval = setInterval(() => {
-                            timeLeft -= 0.1;
-                            if (timeLeft <= 0) {
-                                clearInterval(countdownInterval);
-                                window.location.href = targetPath;
-                            } else {
-                                timerSpan.textContent = timeLeft.toFixed(1);
-                            }
-                        }, 100);
-
-                        // Allow users to cancel the auto-redirect if they stay on the page
-                        cancelBtn.addEventListener('click', () => {
-                            clearInterval(countdownInterval);
-                            bannerDiv.remove();
-                        });
-                    }
-
-                    // Render the full list of search results underneath so they can see everything
-                    results.forEach(result => {
-                        const effectiveScore = Math.min(result.score, 1);
-                        const matchPercentage = Math.round((1 - effectiveScore) * 100);
-                        const game = result.item;
-                        
-                        const itemDiv = document.createElement('div');
-                        itemDiv.className = 'game-item';
-
-                        const link = document.createElement('a');
-                        link.href = getGameUrl(game);
-                        link.textContent = game.name;
-                        
-                        // If they click a result manually, make sure to stop the auto-redirect timer
-                        link.addEventListener('click', () => {
-                            if (countdownInterval) clearInterval(countdownInterval);
-                        });
-
-                        const span = document.createElement('span');
-                        span.style.color = '#555';
-                        span.style.fontSize = '0.9em';
-                        span.style.marginLeft = '10px';
-                        span.textContent = `(${matchPercentage}% match)`;
-
-                        itemDiv.appendChild(link);
-                        itemDiv.appendChild(span);
-                        resultsContainer.appendChild(itemDiv);
-                    });
-                })
-                .catch(err => {
-                    console.error("Error loading directory:", err);
-                    resultsContainer.innerHTML = '<p>Error loading game directory.</p>';
-                });
+            link.appendChild(titleSpan);
+            link.appendChild(metaDiv);
+            return link;
         }
+
+        function populateConsoleDropdown(data) {
+            const consoles = [...new Set(
+                data.map(g => g.console).filter(Boolean)
+            )].sort((a, b) => a.localeCompare(b));
+
+            consoles.forEach(c => {
+                const option = document.createElement('option');
+                option.value = c;
+                option.textContent = c;
+                consoleFilter.appendChild(option);
+            });
+
+            if (selectedConsoleParam) {
+                // Match case-insensitively in case someone typed ?console=snes in the URL
+                const matchedOption = Array.from(consoleFilter.options).find(
+                    opt => opt.value.toLowerCase() === selectedConsoleParam.toLowerCase()
+                );
+                if (matchedOption) {
+                    consoleFilter.value = matchedOption.value;
+                }
+            }
+        }
+
+        function renderResults() {
+            clearRedirectTimer();
+            const activeQuery = inlineSearchInput.value.trim();
+            const activeConsole = consoleFilter.value;
+            const cleanQuery = activeQuery.toLowerCase();
+
+            // Filter dataset by selected console first
+            const filteredPool = activeConsole
+                ? directoryData.filter(g => (g.console || '').toLowerCase() === activeConsole.toLowerCase())
+                : directoryData;
+
+            const broadSearchTerms = ["pokemon", "tetris", "bloons", "learn to fly"];
+            const isBroadTerm = !forceSearch && !activeConsole && broadSearchTerms.includes(cleanQuery);
+
+            if (showAll || (!activeQuery && activeConsole)) {
+                pageHeading.innerHTML = activeConsole
+                    ? `All <span id="search-term">${activeConsole}</span> Games`
+                    : 'All Available Games';
+
+                if (!filteredPool || filteredPool.length === 0) {
+                    resultsContainer.innerHTML = '<p class="status-msg">No games found for this filter.</p>';
+                    return;
+                }
+
+                const sortedGames = [...filteredPool].sort((a, b) => a.name.localeCompare(b.name));
+                resultsContainer.innerHTML = `<p class="count-label">Showing ${sortedGames.length} game${sortedGames.length === 1 ? '' : 's'}:</p>`;
+
+                sortedGames.forEach(game => {
+                    resultsContainer.appendChild(createGameCard(game));
+                });
+
+            } else if (!activeQuery) {
+                pageHeading.innerHTML = 'Search Results for: <span id="search-term">Nothing</span>';
+                resultsContainer.innerHTML = '<p class="status-msg">Please enter a search term above or click <strong>All Games</strong>.</p>';
+
+            } else if (isBroadTerm) {
+                pageHeading.innerHTML = `Search Results for: <span id="search-term">${activeQuery}</span>`;
+                const forceUrl = buildSearchUrl(activeQuery, activeConsole, false, true);
+                resultsContainer.innerHTML = `<p class="status-msg">This search is too broad—try being more specific, pick a console, or <a href="${forceUrl}">search anyway</a>.</p>`;
+
+            } else {
+                pageHeading.innerHTML = activeConsole
+                    ? `Search Results for: <span id="search-term">${activeQuery}</span> (${activeConsole})`
+                    : `Search Results for: <span id="search-term">${activeQuery}</span>`;
+
+                const options = {
+                    includeScore: true,
+                    threshold: 0.2,
+                    distance: 100,
+                    keys: ['name', 'slug']
+                };
+
+                const fuse = new Fuse(filteredPool, options);
+                const results = fuse.search(activeQuery);
+
+                if (results.length === 0) {
+                    resultsContainer.innerHTML = activeConsole
+                        ? `<p class="status-msg">No matching games found on <strong>${activeConsole}</strong>. Try switching to <strong>All Consoles</strong>.</p>`
+                        : '<p class="status-msg">No matching games found.</p>';
+                    return;
+                }
+
+                results.forEach(res => {
+                    const extraChars = res.item.name.length - cleanQuery.length;
+                    if (extraChars > 0) {
+                        res.score += extraChars * 0.03;
+                    }
+                });
+
+                results.sort((a, b) => a.score - b.score);
+
+                if (!forceSearch && results.length > 10) {
+                    const forceUrl = buildSearchUrl(activeQuery, activeConsole, false, true);
+                    resultsContainer.innerHTML = `<p class="status-msg">Too many matches (${results.length} games found). Try being more specific, pick a console, or <a href="${forceUrl}">search anyway</a>.</p>`;
+                    return;
+                }
+
+                resultsContainer.innerHTML = '';
+
+                const isPerfectMatch = results[0].score <= 0.05;
+
+                if (isPerfectMatch) {
+                    const targetPath = getGameUrl(results[0].item);
+                    const gameName = results[0].item.name;
+                    let timeLeft = 3.5;
+
+                    const bannerDiv = document.createElement('div');
+                    bannerDiv.className = 'redirect-banner';
+                    bannerDiv.innerHTML = `
+                        <p><strong>${gameName}</strong> found. Opening in <span id="countdown-timer">${timeLeft.toFixed(1)}</span>s...</p>
+                        <button id="cancel-redirect" class="cancel-btn">Stay Here</button>
+                    `;
+                    resultsContainer.appendChild(bannerDiv);
+
+                    const timerSpan = document.getElementById('countdown-timer');
+                    const cancelBtn = document.getElementById('cancel-redirect');
+
+                    countdownInterval = setInterval(() => {
+                        timeLeft -= 0.1;
+                        if (timeLeft <= 0) {
+                            clearRedirectTimer();
+                            window.location.href = targetPath;
+                        } else {
+                            timerSpan.textContent = timeLeft.toFixed(1);
+                        }
+                    }, 100);
+
+                    cancelBtn.addEventListener('click', () => {
+                        clearRedirectTimer();
+                        bannerDiv.remove();
+                    });
+                }
+
+                results.forEach(result => {
+                    const effectiveScore = Math.min(result.score, 1);
+                    const matchPercentage = Math.round((1 - effectiveScore) * 100);
+                    resultsContainer.appendChild(createGameCard(result.item, matchPercentage));
+                });
+            }
+        }
+
+        fetch('directory.json')
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                directoryData = data || [];
+                populateConsoleDropdown(directoryData);
+                renderResults();
+            })
+            .catch(err => {
+                console.error("Error loading directory:", err);
+                resultsContainer.innerHTML = '<p class="status-msg">Error loading game directory.</p>';
+            });
     </script>
 </body>
 </html>
