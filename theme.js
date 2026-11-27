@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const root = document.documentElement;
 
     function stripQuotes(str) {
-        return str.trim().replace(/^["']+|["']+$/g, '').trim();
+        return String(str).trim().replace(/^["']+|["']+$/g, '').trim();
     }
 
     // 1. Parse Hex Color, Luminance (> #808080 check), and Contrasting Hues
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100), r, g, b };
     }
 
-    const bgHex = cfg['photo.background'] || '#2967d8';
+    const bgHex = cfg['photo.background'] || '#1b263b';
     const hsl = hexToHsl(bgHex);
 
     const brightness = (hsl.r * 299 + hsl.g * 587 + hsl.b * 114) / 1000;
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     document.title = isHome ? titleText : `${titleText} - Project School Stash`;
 
-    // 3. Build Left & Right Columns (Switches between Search Bar on Home vs Play Now! on Games)
+    // 3. Build Left & Right Columns (Search Bar on Home vs Play Now! on Games)
     const photoSrc = cfg['game.photo'] || 'favicon.png';
     const descriptionText = cfg.description || '';
     const songTitle = stripQuotes(cfg['song.title'] || '');
@@ -105,6 +105,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     document.body.innerHTML = `
         <audio id="myAudio" autoplay loop preload="auto">
             <source src="${audioSrc}" type="audio/ogg; codecs=opus">
+            <source src="${audioSrc}" type="audio/mpeg">
             <source src="audio.mp3" type="audio/mpeg">
             <source src="music.mp3" type="audio/mpeg">
         </audio>
@@ -158,21 +159,20 @@ document.addEventListener('DOMContentLoaded', async function () {
     fitTitleToOneLine();
     window.addEventListener('resize', fitTitleToOneLine);
 
-    // 4. Persistent Volume Control + Muted-Start Autoplay Trick
+    // 4. Persistent Volume Control (Never stuck muted) + Autoplay
     const audio = document.getElementById('myAudio');
     const volumeSlider = document.getElementById('volumeSlider');
     const muteBtn = document.getElementById('muteBtn');
     const songBanner = document.getElementById('songBanner');
 
     const VOLUME_KEY = 'pss_music_volume';
-    const MUTED_KEY = 'pss_music_muted';
+    const savedVolume = parseFloat(localStorage.getItem(VOLUME_KEY));
+    // Ensure saved volume is valid and > 0 so it never boots up silently
+    const targetVolume = (!isNaN(savedVolume) && savedVolume > 0) ? savedVolume : 0.65;
 
-    const savedVolume = localStorage.getItem(VOLUME_KEY);
-    const userPrefersMuted = localStorage.getItem(MUTED_KEY) === 'true';
-
-    const targetVolume = savedVolume !== null ? parseFloat(savedVolume) : 0.65;
     audio.volume = targetVolume;
-    volumeSlider.value = userPrefersMuted ? 0 : targetVolume;
+    audio.muted = false;
+    volumeSlider.value = targetVolume;
 
     function syncAudioUI() {
         const isSilent = audio.paused || audio.muted || audio.volume === 0;
@@ -200,17 +200,16 @@ document.addEventListener('DOMContentLoaded', async function () {
         const newVol = parseFloat(this.value);
         audio.volume = newVol;
         audio.muted = (newVol === 0);
-        if (newVol > 0 && audio.paused) audio.play().catch(() => {});
-
-        localStorage.setItem(VOLUME_KEY, newVol);
-        localStorage.setItem(MUTED_KEY, audio.muted);
+        if (newVol > 0) {
+            localStorage.setItem(VOLUME_KEY, newVol);
+            if (audio.paused) audio.play().catch(() => {});
+        }
         syncAudioUI();
     });
 
     muteBtn.addEventListener('click', function (e) {
         e.stopPropagation();
         audio.muted = !audio.muted;
-        localStorage.setItem(MUTED_KEY, audio.muted);
 
         if (audio.muted) {
             volumeSlider.value = 0;
@@ -224,9 +223,11 @@ document.addEventListener('DOMContentLoaded', async function () {
         syncAudioUI();
     });
 
+    // Unlock audio immediately on any user interaction if browser blocks unmuted autoplay
     const unlockEvents = ['pointerdown', 'touchstart', 'keydown', 'click'];
     function unlockOnInteraction() {
-        audio.muted = userPrefersMuted;
+        audio.muted = false;
+        audio.volume = targetVolume;
         audio.play().then(() => {
             syncAudioUI();
             unlockEvents.forEach(evt => window.removeEventListener(evt, unlockOnInteraction, true));
@@ -234,15 +235,23 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
     unlockEvents.forEach(evt => window.addEventListener(evt, unlockOnInteraction, true));
 
-    audio.muted = true;
-    audio.play().then(function () {
-        audio.muted = userPrefersMuted;
+    // Try direct unmuted autoplay first; if blocked, try muted-start -> unmute on next frame
+    audio.play().then(() => {
         syncAudioUI();
-        if (!audio.paused) {
-            unlockEvents.forEach(evt => window.removeEventListener(evt, unlockOnInteraction, true));
-        }
-    }).catch(function () {
-        audio.muted = userPrefersMuted;
-        syncAudioUI();
+        unlockEvents.forEach(evt => window.removeEventListener(evt, unlockOnInteraction, true));
+    }).catch(() => {
+        audio.muted = true;
+        audio.play().then(() => {
+            requestAnimationFrame(() => {
+                audio.muted = false;
+                syncAudioUI();
+                if (!audio.paused) {
+                    unlockEvents.forEach(evt => window.removeEventListener(evt, unlockOnInteraction, true));
+                }
+            });
+        }).catch(() => {
+            audio.muted = false;
+            syncAudioUI();
+        });
     });
 });
