@@ -40,11 +40,11 @@
             max-width: 900px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 18px;
         }
 
-        /* Top Bar: Back Button + Inline Search + Console Filter */
-        .top-bar {
+        /* Top Utility Bar: Nav Buttons + Song Banner + Persistent Volume */
+        .utility-bar {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
@@ -75,16 +75,70 @@
             transform: translateY(-2px);
         }
 
-        .inline-search {
+        .audio-area {
             display: flex;
-            flex: 1;
-            min-width: 280px;
-            max-width: 540px;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pss-song-link {
+            display: none;
+            color: var(--accent-color);
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-decoration: none;
+            background: var(--ui-glass);
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--ui-border);
+            backdrop-filter: blur(6px);
+            transition: transform 0.15s ease;
+        }
+
+        .pss-song-link.is-playing {
+            display: inline-block;
+        }
+
+        .pss-song-link:hover {
+            text-decoration: underline;
+            transform: scale(1.02);
+        }
+
+        .pss-audio-controls {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
             background: var(--ui-glass);
             border: 1px solid var(--ui-border);
             border-radius: 10px;
-            padding: 4px;
-            gap: 4px;
+            backdrop-filter: blur(6px);
+        }
+
+        .pss-audio-controls button {
+            background: none;
+            border: none;
+            font-size: 1.15rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .pss-audio-controls input[type="range"] {
+            width: 100px;
+            cursor: pointer;
+            accent-color: var(--btn-color);
+        }
+
+        /* Inline Search + Console Filter Bar */
+        .inline-search {
+            display: flex;
+            width: 100%;
+            background: var(--ui-glass);
+            border: 1px solid var(--ui-border);
+            border-radius: 12px;
+            padding: 5px;
+            gap: 6px;
             backdrop-filter: blur(6px);
         }
 
@@ -95,9 +149,9 @@
             border: none;
             outline: none;
             color: var(--text-color);
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-weight: 600;
-            padding: 6px 12px;
+            padding: 8px 14px;
         }
 
         .inline-search input::placeholder {
@@ -108,9 +162,9 @@
             background: rgba(0, 0, 0, 0.35);
             color: var(--text-color);
             border: 1px solid var(--ui-border);
-            border-radius: 7px;
-            padding: 6px 10px;
-            font-size: 0.9rem;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
             outline: none;
@@ -125,10 +179,10 @@
             background: var(--btn-color);
             color: #ffffff;
             border: none;
-            padding: 8px 16px;
-            border-radius: 7px;
+            padding: 9px 20px;
+            border-radius: 8px;
             font-weight: 800;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: filter 0.15s ease;
         }
@@ -289,21 +343,36 @@
     </style>
 </head>
 <body>
+    <audio id="myAudio" autoplay loop preload="auto">
+        <source src="search.opus" type="audio/ogg; codecs=opus">
+        <source src="search.mp3" type="audio/mpeg">
+    </audio>
+
     <div class="pss-container">
-        <div class="top-bar">
+        <div class="utility-bar">
             <div class="nav-group">
                 <button class="glass-btn" onclick="window.location.href='index.html';">← Home</button>
                 <button class="glass-btn" onclick="window.location.href='search.html?all=true';">All Games</button>
             </div>
 
-            <form id="inlineSearchForm" class="inline-search">
-                <input type="text" id="inlineSearchInput" placeholder="Search games..." autocomplete="off" aria-label="Search games">
-                <select id="consoleFilter" class="console-select" aria-label="Filter by console">
-                    <option value="">All Consoles</option>
-                </select>
-                <button type="submit">Search</button>
-            </form>
+            <div class="audio-area">
+                <a id="songBanner" class="pss-song-link" href="https://www.youtube.com/watch?v=7VrUN55aAmY" target="_blank" rel="noopener">
+                    You are now hearing: "Jeopardy! Theme"
+                </a>
+                <div class="pss-audio-controls">
+                    <button id="muteBtn" aria-label="Toggle Mute">🔊</button>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.65" aria-label="Music Volume">
+                </div>
+            </div>
         </div>
+
+        <form id="inlineSearchForm" class="inline-search">
+            <input type="text" id="inlineSearchInput" placeholder="Search games..." autocomplete="off" aria-label="Search games">
+            <select id="consoleFilter" class="console-select" aria-label="Filter by console">
+                <option value="">All Consoles</option>
+            </select>
+            <button type="submit">Search</button>
+        </form>
 
         <h2 id="page-heading">Search Results for: <span id="search-term"></span></h2>
 
@@ -318,6 +387,100 @@
     </div>
 
     <script>
+        // === 1. PERSISTENT AUDIO & AUTOPLAY ===
+        const audio = document.getElementById('myAudio');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const muteBtn = document.getElementById('muteBtn');
+        const songBanner = document.getElementById('songBanner');
+
+        const VOLUME_KEY = 'pss_music_volume';
+        const savedVolume = parseFloat(localStorage.getItem(VOLUME_KEY));
+        const targetVolume = (!isNaN(savedVolume) && savedVolume > 0) ? savedVolume : 0.65;
+
+        audio.volume = targetVolume;
+        audio.muted = false;
+        volumeSlider.value = targetVolume;
+
+        function syncAudioUI() {
+            const isSilent = audio.paused || audio.muted || audio.volume === 0;
+            if (audio.muted || audio.volume === 0) {
+                muteBtn.textContent = '🔇';
+            } else if (audio.volume < 0.5) {
+                muteBtn.textContent = '🔉';
+            } else {
+                muteBtn.textContent = '🔊';
+            }
+
+            if (!isSilent) {
+                songBanner.classList.add('is-playing');
+            } else {
+                songBanner.classList.remove('is-playing');
+            }
+        }
+
+        audio.addEventListener('play', syncAudioUI);
+        audio.addEventListener('playing', syncAudioUI);
+        audio.addEventListener('pause', syncAudioUI);
+        audio.addEventListener('volumechange', syncAudioUI);
+
+        volumeSlider.addEventListener('input', function () {
+            const newVol = parseFloat(this.value);
+            audio.volume = newVol;
+            audio.muted = (newVol === 0);
+            if (newVol > 0) {
+                localStorage.setItem(VOLUME_KEY, newVol);
+                if (audio.paused) audio.play().catch(() => {});
+            }
+            syncAudioUI();
+        });
+
+        muteBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            audio.muted = !audio.muted;
+
+            if (audio.muted) {
+                volumeSlider.value = 0;
+            } else {
+                const restoreVol = audio.volume > 0 ? audio.volume : 0.65;
+                audio.volume = restoreVol;
+                volumeSlider.value = restoreVol;
+                localStorage.setItem(VOLUME_KEY, restoreVol);
+                if (audio.paused) audio.play().catch(() => {});
+            }
+            syncAudioUI();
+        });
+
+        const unlockEvents = ['pointerdown', 'touchstart', 'keydown', 'click'];
+        function unlockOnInteraction() {
+            audio.muted = false;
+            audio.volume = targetVolume;
+            audio.play().then(() => {
+                syncAudioUI();
+                unlockEvents.forEach(evt => window.removeEventListener(evt, unlockOnInteraction, true));
+            }).catch(() => {});
+        }
+        unlockEvents.forEach(evt => window.addEventListener(evt, unlockOnInteraction, true));
+
+        audio.play().then(() => {
+            syncAudioUI();
+            unlockEvents.forEach(evt => window.removeEventListener(evt, unlockOnInteraction, true));
+        }).catch(() => {
+            audio.muted = true;
+            audio.play().then(() => {
+                requestAnimationFrame(() => {
+                    audio.muted = false;
+                    syncAudioUI();
+                    if (!audio.paused) {
+                        unlockEvents.forEach(evt => window.removeEventListener(evt, unlockOnInteraction, true));
+                    }
+                });
+            }).catch(() => {
+                audio.muted = false;
+                syncAudioUI();
+            });
+        });
+
+        // === 2. SEARCH & CONSOLE FILTER ===
         const urlParams = new URLSearchParams(window.location.search);
         const query = urlParams.get('q') || '';
         const selectedConsoleParam = urlParams.get('console') || '';
@@ -348,8 +511,6 @@
                 nextParams.set('all', 'true');
             } else if (qVal) {
                 nextParams.set('q', qVal);
-            } else if (consoleVal) {
-                nextParams.set('all', 'true');
             } else {
                 nextParams.set('all', 'true');
             }
@@ -367,7 +528,6 @@
             window.location.href = buildSearchUrl(q, c, !q);
         });
 
-        // Re-filter live when the user changes the console dropdown
         consoleFilter.addEventListener('change', function () {
             clearRedirectTimer();
             const nextUrl = buildSearchUrl(inlineSearchInput.value.trim(), this.value, showAll && !inlineSearchInput.value.trim(), forceSearch);
@@ -424,7 +584,6 @@
             });
 
             if (selectedConsoleParam) {
-                // Match case-insensitively in case someone typed ?console=snes in the URL
                 const matchedOption = Array.from(consoleFilter.options).find(
                     opt => opt.value.toLowerCase() === selectedConsoleParam.toLowerCase()
                 );
@@ -440,7 +599,6 @@
             const activeConsole = consoleFilter.value;
             const cleanQuery = activeQuery.toLowerCase();
 
-            // Filter dataset by selected console first
             const filteredPool = activeConsole
                 ? directoryData.filter(g => (g.console || '').toLowerCase() === activeConsole.toLowerCase())
                 : directoryData;
