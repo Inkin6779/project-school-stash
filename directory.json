@@ -1,5 +1,25 @@
 [
   {
+    "repo": "pss-flash",
+    "path": "MeatBoy",
+    "index": "MeatBoy/index.html",
+    "slug": "MeatBoy",
+    "repo_url": "https://github.com/Inkin6779/pss-flash",
+    "title": "Learn To Fly",
+    "console": "Flash",
+    "name": "Learn To Fly"
+  },
+  {
+    "repo": "pss-flash",
+    "path": "LearnToFly",
+    "index": "LearnToFly/index.html",
+    "slug": "LearnToFly",
+    "repo_url": "https://github.com/Inkin6779/pss-flash",
+    "title": "Learn To Fly",
+    "console": "Flash",
+    "name": "Learn To Fly"
+  },
+  {
     "repo": "pss-snes",
     "path": "SuperMarioWorld",
     "index": "SuperMarioWorld/index.html",
