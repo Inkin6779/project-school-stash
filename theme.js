@@ -2,6 +2,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     const cfg = window.GAME_CONFIG || {};
     const root = document.documentElement;
 
+    // Helper to strip surrounding quotes ("..." or '...') from .info values
+    function stripQuotes(str) {
+        return str.trim().replace(/^["']+|["']+$/g, '').trim();
+    }
+
     // 1. Parse Hex Color, Luminance (> #808080 check), and Contrasting Hues
     function hexToHsl(hex) {
         hex = hex.replace('#', '');
@@ -31,12 +36,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     const bgHex = cfg['photo.background'] || '#2967d8';
     const hsl = hexToHsl(bgHex);
 
-    // Perceived brightness check (matches > #808080 threshold)
+    // Perceived brightness check (> #808080 threshold)
     const brightness = (hsl.r * 299 + hsl.g * 587 + hsl.b * 114) / 1000;
     const isLightBg = brightness > 0.5;
     const textColor = isLightBg ? '#111111' : '#ffffff';
 
-    // Generate two distinct contrasting hues (split-complementary: +145deg and +215deg)
+    // Generate two distinct contrasting hues (+145deg and +215deg)
     const songHue = (hsl.h + 145) % 360;
     const btnHue = (hsl.h + 215) % 360;
     const songColor = isLightBg ? `hsl(${songHue}, 85%, 30%)` : `hsl(${songHue}, 95%, 72%)`;
@@ -48,9 +53,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     root.style.setProperty('--btn-color', btnColor);
     root.style.setProperty('--btn-text-color', '#ffffff');
 
-    // 2. Grab title and genre from the .info file
-    let titleText = cfg.title || 'Untitled Game';
-    let genreText = cfg['main.genre'] || 'Retro';
+    // 2. Grab title and genre from the .info file and remove any quotes
+    let titleText = stripQuotes(cfg.title || 'Untitled Game');
+    let genreText = stripQuotes(cfg['main.genre'] || 'Retro');
 
     if (cfg.infoFile) {
         try {
@@ -59,8 +64,8 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const infoContent = await res.text();
                 const titleMatch = infoContent.match(/^title\s*=\s*(.+)$/mi);
                 const genreMatch = infoContent.match(/^genre\s*=\s*(.+)$/mi);
-                if (titleMatch) titleText = titleMatch[1].trim();
-                if (genreMatch) genreText = genreMatch[1].trim();
+                if (titleMatch) titleText = stripQuotes(titleMatch[1]);
+                if (genreMatch) genreText = stripQuotes(genreMatch[1]);
             }
         } catch (err) {
             console.warn('Could not load .info file, using fallback values:', err);
@@ -72,11 +77,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     // 3. Inject the 6x6 Quadrant Layout into <body>
     const photoSrc = cfg['game.photo'] || 'favicon.png';
     const descriptionText = cfg.description || '';
-    const songTitle = cfg['song.title'] || '';
+    const songTitle = stripQuotes(cfg['song.title'] || '');
     const songLink = cfg['song.link'] || '#';
 
     document.body.innerHTML = `
-        <audio id="myAudio" loop>
+        <audio id="myAudio" autoplay loop preload="auto">
             <source src="music.opus" type="audio/ogg; codecs=opus">
             <source src="music.mp3" type="audio/mpeg">
         </audio>
@@ -99,15 +104,28 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             <section class="pss-right-col">
                 <a id="songBanner" class="pss-song-link" href="${songLink}" target="_blank" rel="noopener">
-                    You are now hearing: ${songTitle}
+                    You are now hearing: "${songTitle}"
                 </a>
-                <h1 class="pss-title">${titleText}</h1>
+                <h1 id="gameTitle" class="pss-title">${titleText}</h1>
                 <p class="pss-description">${descriptionText}</p>
             </section>
         </main>
     `;
 
-    // 4. Persistent Volume Control & Song Visibility Sync
+    // Auto-shrink title font-size if a very long title ever exceeds its container width
+    const titleEl = document.getElementById('gameTitle');
+    function fitTitleToOneLine() {
+        titleEl.style.fontSize = '';
+        let currentSize = parseFloat(window.getComputedStyle(titleEl).fontSize);
+        while (titleEl.scrollWidth > titleEl.parentElement.clientWidth && currentSize > 14) {
+            currentSize -= 1;
+            titleEl.style.fontSize = `${currentSize}px`;
+        }
+    }
+    fitTitleToOneLine();
+    window.addEventListener('resize', fitTitleToOneLine);
+
+    // 4. Persistent Volume Control & Instant Autoplay Unlock
     const audio = document.getElementById('myAudio');
     const volumeSlider = document.getElementById('volumeSlider');
     const muteBtn = document.getElementById('muteBtn');
@@ -134,7 +152,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             muteBtn.textContent = '🔊';
         }
 
-        // Only show "You are now hearing: ..." when audio is actually playing and audible
         if (!isSilent && songTitle) {
             songBanner.classList.add('is-playing');
         } else {
@@ -143,6 +160,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     audio.addEventListener('play', syncAudioUI);
+    audio.addEventListener('playing', syncAudioUI);
     audio.addEventListener('pause', syncAudioUI);
     audio.addEventListener('volumechange', syncAudioUI);
 
@@ -157,7 +175,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         syncAudioUI();
     });
 
-    muteBtn.addEventListener('click', function () {
+    muteBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
         audio.muted = !audio.muted;
         localStorage.setItem(MUTED_KEY, audio.muted);
 
@@ -173,15 +192,21 @@ document.addEventListener('DOMContentLoaded', async function () {
         syncAudioUI();
     });
 
-    // Attempt autoplay; fall back to first user click/keypress anywhere on page
-    audio.play().then(syncAudioUI).catch(function () {
-        syncAudioUI();
-        const unlockAudio = function () {
-            audio.play().then(syncAudioUI).catch(() => {});
-            document.removeEventListener('click', unlockAudio);
-            document.removeEventListener('keydown', unlockAudio);
-        };
-        document.addEventListener('click', unlockAudio);
-        document.addEventListener('keydown', unlockAudio);
-    });
+    // Attempt immediate playback; if browser blocks unmuted autoplay, unlock on the very first interaction
+    function tryStartAudio() {
+        audio.play().then(() => {
+            syncAudioUI();
+            removeUnlockListeners();
+        }).catch(() => {
+            syncAudioUI();
+        });
+    }
+
+    const unlockEvents = ['pointerdown', 'touchstart', 'keydown', 'click'];
+    function removeUnlockListeners() {
+        unlockEvents.forEach(evt => window.removeEventListener(evt, tryStartAudio, true));
+    }
+
+    unlockEvents.forEach(evt => window.addEventListener(evt, tryStartAudio, true));
+    tryStartAudio();
 });
