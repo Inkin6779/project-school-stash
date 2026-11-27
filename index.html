@@ -1,111 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="20J8Oifs9LxokXTLlqq89TJzl6fuISlU0uCkMpqVBUA" />
-    <link rel="shortcut icon" type="image/jpeg" href="download.jpg"/>
-    <title>Project School Stash</title>
-
-    <style>
-        /* Simple styling for the dynamic repository search area */
-        .search-container {
-            margin: 20px auto;
-            max-width: 500px;
-        }
-        .search-input {
-            padding: 8px;
-            width: 60%;
-            font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .search-btn {
-            padding: 8px 12px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        .repo-results {
-            margin-top: 15px;
-            text-align: center;
-            max-width: 600px;
-            width: 100%;
-        }
-    </style>
+    <link rel="shortcut icon" type="image/jpeg" href="favicon.jpg">
+    <link rel="stylesheet" href="theme.css">
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-          // Audio Configuration
-          var audio = document.getElementById('myAudio');
-          audio.volume = 0.65;
-          audio.muted = true;
-          audio.play().then(function() {
-            audio.muted = false;
-          }).catch(function(error) {
-            console.log('Playback failed:', error);
-          });
-
-          // Allow users to press "Enter" in the search box
-          document.getElementById('repoSearchInput').addEventListener('keypress', function (e) {
-              if (e.key === 'Enter') {
-                  goToSearch();
-              }
-          });
-        });
-
-        // Redirects to search.html with the user's query
-        function goToSearch() {
-            const searchInput = document.getElementById('repoSearchInput').value.trim();
-            const resultsContainer = document.getElementById('repoResults');
-            
-            if (!searchInput) {
-                resultsContainer.innerHTML = "<p style='color: gray;'>Type a title keyword above to find games...</p>";
-                return;
-            }
-
-            window.location.href = `search.html?q=${encodeURIComponent(searchInput)}`;
-        }
+        window.GAME_CONFIG = {
+            "isHome": true,
+            "title": "Project School Stash",
+            "tagline": "Provided by Inkin6779",
+            "game.photo": "favicon.jpg",
+            "photo.background": "#1b263b",
+            "description": "Your little game provider while in school, actually updated. Search for a game on the left.",
+            "song.title": "Friday Night Funkin' Lullaby's Shop Theme",
+            "song.link": "https://youtube.com",
+            "song.file": "audio.mp3",
+            "quickLinks": [
+                { "label": "Forms", "url": "form" },
+                { "label": "Updates", "url": "updates" }
+            ]
+        };
     </script>
+    <script src="theme.js" defer></script>
 </head>
-<body>
-    <audio id="myAudio" autoplay loop>
-        <source src="audio.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
-
-    <header>
-        <div style="text-align: center;">
-          <p><a href="https://youtube.com">Song Playing: Friday Night Funkin' Lullaby's Shop Theme</a></p>
-            <h1>Project School Stash</h1>
-            <h2>Provided by <a href="https://inkin6779.github.io">Inkin6779</a></h2>
-            <h3 style="color: red;">WARNING: If you can not find your game right now, this part of the site is under a re-modeling. If you know the URL directly, enter it that way, if not, use the search below.</h3>
-            <p>Your little game provider while in school, and actually updated. (At least as much as I can do/am aware of, make me aware <a href="https://inkin6779.github.io/socials">here</a>, or use the form below if you need it.)</p>
-            <p>Yes, I know. The "Leave Site?" prompt is annoying in the games, but it's actually further expanded than you think.</p>
-        </div>
-    </header>
-    <div style="text-align: center;">
-        <button onclick="window.location.href='classic';">Classic Games</button>
-        <button onclick="window.location.href='general';">Normal Games</button>
-        <button onclick="window.location.href='flash';">Flash Games</button>
-        <button onclick="window.location.href='emulators';">Emulators</button>
-        <button onclick="window.location.href='windows';">Windows</button><br>
-        <button onclick="window.location.href='form';">Forms</button>
-    </div>
-    
-    <!-- Search Interface Section -->
-    <div class="search-container" style="text-align: center;">
-        <input type="text" id="repoSearchInput" class="search-input" placeholder="Search other games by Inkin6779...">
-        <button onclick="goToSearch();" class="search-btn">Search Stashes</button>
-        <br>
-        <div id="repoResults" class="repo-results"></div>
-    </div>
-
-    <div style="text-align: center;">
-        <button onclick="window.location.href='updates';">Update Log</button>
-    </div>
-    <footer>
-        <div style="text-align: center;">
-            <p>In case you ask: we were <a href="https://sites.google.com/view/project-school-stash/home">here,</a> but moved so it could appear on Google Searches, as seen <a href="https://www.google.com/search?q=project+school+stash">here.</a></p>
-        </div>
-    </footer>
-</body>
+<body></body>
 </html>
