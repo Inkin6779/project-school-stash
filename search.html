@@ -58,6 +58,11 @@
         const cleanQuery = query ? query.trim().toLowerCase() : '';
         const isBroadTerm = !forceSearch && broadSearchTerms.includes(cleanQuery);
 
+        // Helper to build the repo/path URL consistently
+        function getGameUrl(game) {
+            return `../${game.repo}/${game.path}`;
+        }
+
         if (showAll) {
             pageHeading.textContent = 'All Available Games';
             fetch('directory.json')
@@ -79,7 +84,7 @@
                         itemDiv.className = 'game-item';
 
                         const link = document.createElement('a');
-                        link.href = `https://inkin6779.github.io/project-school-stash/${game.path}`;
+                        link.href = getGameUrl(game);
                         link.textContent = game.name;
 
                         itemDiv.appendChild(link);
@@ -147,7 +152,7 @@
                     let countdownInterval = null;
 
                     if (isPerfectMatch) {
-                        const targetPath = `https://inkin6779.github.io/project-school-stash/${results[0].item.path}`;
+                        const targetPath = getGameUrl(results[0].item);
                         const gameName = results[0].item.name;
                         let timeLeft = 3.5;
 
@@ -191,7 +196,7 @@
                         itemDiv.className = 'game-item';
 
                         const link = document.createElement('a');
-                        link.href = `https://inkin6779.github.io/project-school-stash/${game.path}`;
+                        link.href = getGameUrl(game);
                         link.textContent = game.name;
                         
                         // If they click a result manually, make sure to stop the auto-redirect timer
