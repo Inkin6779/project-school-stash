@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', async function () {
     const cfg = window.GAME_CONFIG || {};
+    const isHome = Boolean(cfg.isHome);
     const root = document.documentElement;
 
     function stripQuotes(str) {
@@ -50,8 +51,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     root.style.setProperty('--btn-color', btnColor);
     root.style.setProperty('--btn-text-color', '#ffffff');
 
-    // 2. Grab title and genre from the .info file and remove any quotes
-    let titleText = stripQuotes(cfg.title || 'Untitled Game');
+    // 2. Grab title and genre from the .info file (or fallback to GAME_CONFIG)
+    let titleText = stripQuotes(cfg.title || 'Project School Stash');
     let genreText = stripQuotes(cfg['main.genre'] || 'Retro');
 
     if (cfg.infoFile) {
@@ -69,24 +70,47 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    document.title = `${titleText} - Project School Stash`;
+    document.title = isHome ? titleText : `${titleText} - Project School Stash`;
 
-    // 3. Inject the 6x6 Quadrant Layout into <body>
+    // 3. Build Left & Right Columns (Switches between Search Bar on Home vs Play Now! on Games)
     const photoSrc = cfg['game.photo'] || 'favicon.png';
     const descriptionText = cfg.description || '';
     const songTitle = stripQuotes(cfg['song.title'] || '');
     const songLink = cfg['song.link'] || '#';
+    const audioSrc = cfg['song.file'] || 'music.opus';
+
+    const topCaption = isHome
+        ? (cfg.tagline || 'Provided by Inkin6779')
+        : `A ${genreText} game!`;
+
+    const bottomActionHTML = isHome
+        ? `<form id="pssSearchForm" class="pss-home-search">
+               <input type="text" id="pssSearchInput" placeholder="Search games..." autocomplete="off" aria-label="Search games">
+               <button type="submit">Search</button>
+           </form>`
+        : `<button class="pss-play-btn" onclick="window.location.href='game.html';">Play Now!</button>`;
+
+    const quickLinksHTML = (isHome && Array.isArray(cfg.quickLinks))
+        ? `<div class="pss-quick-links">
+               ${cfg.quickLinks.map(link => `<button type="button" onclick="window.location.href='${link.url}';">${link.label}</button>`).join('')}
+           </div>`
+        : '';
+
+    const homeNavHTML = isHome
+        ? `<nav class="pss-home-nav"></nav>`
+        : `<nav class="pss-home-nav">
+               <button class="pss-home-btn" onclick="window.location.href='/project-school-stash/';">← Home</button>
+           </nav>`;
 
     document.body.innerHTML = `
         <audio id="myAudio" autoplay loop preload="auto">
-            <source src="music.opus" type="audio/ogg; codecs=opus">
+            <source src="${audioSrc}" type="audio/ogg; codecs=opus">
+            <source src="audio.mp3" type="audio/mpeg">
             <source src="music.mp3" type="audio/mpeg">
         </audio>
 
         <main class="pss-stage">
-            <nav class="pss-home-nav">
-                <button class="pss-home-btn" onclick="window.location.href='/project-school-stash/';">← Home</button>
-            </nav>
+            ${homeNavHTML}
 
             <div class="pss-audio-controls">
                 <button id="muteBtn" aria-label="Toggle Mute">🔊</button>
@@ -94,9 +118,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             </div>
 
             <section class="pss-left-col">
-                <p class="pss-genre">A ${genreText} game!</p>
+                <p class="pss-genre">${topCaption}</p>
                 <img class="pss-photo" src="${photoSrc}" alt="${titleText}">
-                <button class="pss-play-btn" onclick="window.location.href='game.html';">Play Now!</button>
+                ${bottomActionHTML}
             </section>
 
             <section class="pss-right-col">
@@ -105,11 +129,23 @@ document.addEventListener('DOMContentLoaded', async function () {
                 </a>
                 <h1 id="gameTitle" class="pss-title">${titleText}</h1>
                 <p class="pss-description">${descriptionText}</p>
+                ${quickLinksHTML}
             </section>
         </main>
     `;
 
-    // Auto-shrink title font-size if a very long title exceeds its container width
+    // Wire up Home Page Search Submission
+    if (isHome) {
+        const searchForm = document.getElementById('pssSearchForm');
+        const searchInput = document.getElementById('pssSearchInput');
+        searchForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const q = searchInput.value.trim();
+            window.location.href = q ? `search.html?q=${encodeURIComponent(q)}` : `search.html?all=true`;
+        });
+    }
+
+    // Auto-shrink title font-size to stay on one line
     const titleEl = document.getElementById('gameTitle');
     function fitTitleToOneLine() {
         titleEl.style.fontSize = '';
@@ -134,7 +170,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     const savedVolume = localStorage.getItem(VOLUME_KEY);
     const userPrefersMuted = localStorage.getItem(MUTED_KEY) === 'true';
 
-    // Default to 0.65 (matching your homepage) unless the user previously adjusted the slider
     const targetVolume = savedVolume !== null ? parseFloat(savedVolume) : 0.65;
     audio.volume = targetVolume;
     volumeSlider.value = userPrefersMuted ? 0 : targetVolume;
@@ -189,7 +224,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         syncAudioUI();
     });
 
-    // Fallback unlock on first interaction if a strict browser pauses after unmuting
     const unlockEvents = ['pointerdown', 'touchstart', 'keydown', 'click'];
     function unlockOnInteraction() {
         audio.muted = userPrefersMuted;
@@ -200,7 +234,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
     unlockEvents.forEach(evt => window.addEventListener(evt, unlockOnInteraction, true));
 
-    // Muted-start autoplay trick: start muted to bypass restriction, then unmute immediately
     audio.muted = true;
     audio.play().then(function () {
         audio.muted = userPrefersMuted;
