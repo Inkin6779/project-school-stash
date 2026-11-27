@@ -1,5 +1,16 @@
 [
   {
+    "repo": "pss-flash",
+    "path": "LearnToFly",
+    "index": "LearnToFly/index.html",
+    "slug": "LearnToFly",
+    "repo_url": "https://github.com/Inkin6779/pss-flash",
+    "title": "Learn To Fly",
+    "console": "Flash",
+    "genre": "strategy",
+    "name": "Learn To Fly"
+  },
+  {
     "repo": "pss-snes",
     "path": "SuperMarioWorld",
     "index": "SuperMarioWorld/index.html",
