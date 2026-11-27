@@ -95,7 +95,7 @@ jobs:
               # 3. Find every .info file (root or any subfolder)
               info_files = [
                   p for p in all_files
-                  if p.endswith(".info")
+                  if p.endswith("game.info")
               ]
               
               for info_path in info_files:
