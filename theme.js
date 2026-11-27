@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     const cfg = window.GAME_CONFIG || {};
     const root = document.documentElement;
 
-    // Helper to strip surrounding quotes ("..." or '...') from .info values
     function stripQuotes(str) {
         return str.trim().replace(/^["']+|["']+$/g, '').trim();
     }
@@ -36,12 +35,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     const bgHex = cfg['photo.background'] || '#2967d8';
     const hsl = hexToHsl(bgHex);
 
-    // Perceived brightness check (> #808080 threshold)
     const brightness = (hsl.r * 299 + hsl.g * 587 + hsl.b * 114) / 1000;
     const isLightBg = brightness > 0.5;
     const textColor = isLightBg ? '#111111' : '#ffffff';
 
-    // Generate two distinct contrasting hues (+145deg and +215deg)
     const songHue = (hsl.h + 145) % 360;
     const btnHue = (hsl.h + 215) % 360;
     const songColor = isLightBg ? `hsl(${songHue}, 85%, 30%)` : `hsl(${songHue}, 95%, 72%)`;
@@ -93,7 +90,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             <div class="pss-audio-controls">
                 <button id="muteBtn" aria-label="Toggle Mute">🔊</button>
-                <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5" aria-label="Music Volume">
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.65" aria-label="Music Volume">
             </div>
 
             <section class="pss-left-col">
@@ -112,7 +109,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         </main>
     `;
 
-    // Auto-shrink title font-size if a very long title ever exceeds its container width
+    // Auto-shrink title font-size if a very long title exceeds its container width
     const titleEl = document.getElementById('gameTitle');
     function fitTitleToOneLine() {
         titleEl.style.fontSize = '';
@@ -125,7 +122,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     fitTitleToOneLine();
     window.addEventListener('resize', fitTitleToOneLine);
 
-    // 4. Persistent Volume Control & Instant Autoplay Unlock
+    // 4. Persistent Volume Control + Muted-Start Autoplay Trick
     const audio = document.getElementById('myAudio');
     const volumeSlider = document.getElementById('volumeSlider');
     const muteBtn = document.getElementById('muteBtn');
@@ -135,12 +132,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     const MUTED_KEY = 'pss_music_muted';
 
     const savedVolume = localStorage.getItem(VOLUME_KEY);
-    const savedMuted = localStorage.getItem(MUTED_KEY) === 'true';
+    const userPrefersMuted = localStorage.getItem(MUTED_KEY) === 'true';
 
-    const initialVolume = savedVolume !== null ? parseFloat(savedVolume) : 0.5;
-    audio.volume = initialVolume;
-    audio.muted = savedMuted;
-    volumeSlider.value = savedMuted ? 0 : initialVolume;
+    // Default to 0.65 (matching your homepage) unless the user previously adjusted the slider
+    const targetVolume = savedVolume !== null ? parseFloat(savedVolume) : 0.65;
+    audio.volume = targetVolume;
+    volumeSlider.value = userPrefersMuted ? 0 : targetVolume;
 
     function syncAudioUI() {
         const isSilent = audio.paused || audio.muted || audio.volume === 0;
@@ -183,7 +180,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (audio.muted) {
             volumeSlider.value = 0;
         } else {
-            const restoreVol = audio.volume > 0 ? audio.volume : 0.5;
+            const restoreVol = audio.volume > 0 ? audio.volume : 0.65;
             audio.volume = restoreVol;
             volumeSlider.value = restoreVol;
             localStorage.setItem(VOLUME_KEY, restoreVol);
@@ -192,21 +189,27 @@ document.addEventListener('DOMContentLoaded', async function () {
         syncAudioUI();
     });
 
-    // Attempt immediate playback; if browser blocks unmuted autoplay, unlock on the very first interaction
-    function tryStartAudio() {
+    // Fallback unlock on first interaction if a strict browser pauses after unmuting
+    const unlockEvents = ['pointerdown', 'touchstart', 'keydown', 'click'];
+    function unlockOnInteraction() {
+        audio.muted = userPrefersMuted;
         audio.play().then(() => {
             syncAudioUI();
-            removeUnlockListeners();
-        }).catch(() => {
-            syncAudioUI();
-        });
+            unlockEvents.forEach(evt => window.removeEventListener(evt, unlockOnInteraction, true));
+        }).catch(() => {});
     }
+    unlockEvents.forEach(evt => window.addEventListener(evt, unlockOnInteraction, true));
 
-    const unlockEvents = ['pointerdown', 'touchstart', 'keydown', 'click'];
-    function removeUnlockListeners() {
-        unlockEvents.forEach(evt => window.removeEventListener(evt, tryStartAudio, true));
-    }
-
-    unlockEvents.forEach(evt => window.addEventListener(evt, tryStartAudio, true));
-    tryStartAudio();
+    // Muted-start autoplay trick: start muted to bypass restriction, then unmute immediately
+    audio.muted = true;
+    audio.play().then(function () {
+        audio.muted = userPrefersMuted;
+        syncAudioUI();
+        if (!audio.paused) {
+            unlockEvents.forEach(evt => window.removeEventListener(evt, unlockOnInteraction, true));
+        }
+    }).catch(function () {
+        audio.muted = userPrefersMuted;
+        syncAudioUI();
+    });
 });
