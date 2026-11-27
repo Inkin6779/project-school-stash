@@ -1,9 +1,9 @@
 [
   {
     "repo": "pss-flash",
-    "path": "MeatBoy",
-    "index": "MeatBoy/index.html",
-    "slug": "MeatBoy",
+    "path": "LearnToFly",
+    "index": "LearnToFly/index.html",
+    "slug": "LearnToFly",
     "repo_url": "https://github.com/Inkin6779/pss-flash",
     "title": "Learn To Fly",
     "console": "Flash",
@@ -11,9 +11,9 @@
   },
   {
     "repo": "pss-flash",
-    "path": "LearnToFly",
-    "index": "LearnToFly/index.html",
-    "slug": "LearnToFly",
+    "path": "MeatBoy",
+    "index": "MeatBoy/index.html",
+    "slug": "MeatBoy",
     "repo_url": "https://github.com/Inkin6779/pss-flash",
     "title": "Learn To Fly",
     "console": "Flash",
